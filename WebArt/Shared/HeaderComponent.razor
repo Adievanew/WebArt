@@ -1,0 +1,23 @@
+﻿@using ArtLib;
+@using WebArt.Models
+@using WebArt.Shared.MainPage
+<header>
+    <NavMenu></NavMenu>
+</header>
+
+@code {
+    [Parameter]
+    public User? CurrentUser { get; set; }
+
+    [Parameter]
+    public EventCallback<User?> RoleCallback { get; set; }
+
+    [Parameter]
+    public EventCallback<User> UserNullCallback { get; set; }
+
+    public void SetUser(User? user)
+    {
+        CurrentUser = user;
+        RoleCallback.InvokeAsync(user);
+    }
+}

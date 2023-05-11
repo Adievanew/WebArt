@@ -1,0 +1,108 @@
+﻿@page "/auth"
+@using System.Web;
+@using Microsoft.AspNetCore.Http
+@inject IHttpContextAccessor httpContextAccessor
+@inject Blazored.LocalStorage.ILocalStorageService localStorage
+@inject IJSRuntime JSRuntime
+@using BootstrapBlazor.Components
+
+<PageTitle>Авторизация</PageTitle>
+<AuthorizeView>
+    <Authorized>
+        <Redirect Url="/profile"></Redirect>
+    </Authorized>
+    <NotAuthorized>
+        <div class="d-flex flex-column center-div gap-20">
+            <h1>Авторизация</h1>
+            <div>
+                <label for="phone-mask" class="form-label">Телефон</label>
+                <input @bind="@Email" type="tel" id="phone-mask" class="form-control modified" placeholder="+7(000)000-00-00" />
+            </div>
+            <BootstrapInput Placeholder="Пароль" @bind-Value="@Password" type='password' />
+            <BootstrapBlazor.Components.Button OnClick=@AuthClick IsAsync="true">Войти</BootstrapBlazor.Components.Button>
+            <BootstrapBlazor.Components.Button OnClick=@RegClick>Регистрация</BootstrapBlazor.Components.Button>
+        </div>
+    </NotAuthorized>
+</AuthorizeView>
+@code {
+    [CascadingParameter]
+    private Task<AuthenticationState>? authenticationState { get; set; }
+    [Inject]
+    private BootstrapBlazor.Components.SwalService swalService { get; set; }
+    public string Email { get; set; }
+    public string Password { get; set; }
+    public User CurrentUser { get; set; }
+
+    public Auth()
+    {
+        CurrentUser = new User();
+    }
+
+    protected override async Task OnInitializedAsync()
+    {
+        if (authenticationState is not null)
+        {
+            var authState = await authenticationState;
+            var user = authState?.User;
+
+            if (user is not null)
+            {
+                if (user.Identity is not null && user.Identity.IsAuthenticated)
+                {
+                    CurrentUser = new User() { Name = user.Identity.Name };
+                }
+            }
+        }
+        //if(await localStorage.ContainKeyAsync("CurrentUser"))
+        //{
+        //    CurrentUser = await localStorage.GetItemAsync<User>("CurrentUser");
+        //}
+    }
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
+        {
+            await JSRuntime.InvokeVoidAsync("masks");
+        }
+    }
+    private string encode(string param)
+    {
+        return HttpUtility.UrlEncode(param);
+    }
+    private async Task AuthClick()
+    {
+        if (!String.IsNullOrEmpty(Email) && !String.IsNullOrEmpty(Password))
+        {
+            var authResponce = await ArtLib.Auth.Login(Email, Password);
+            if (authResponce.User != null)
+            {
+                HTTPService.SetToken(authResponce.Token);
+                //List <Image> cart = await localStorage.GetItemAsync<ShoppingCart>("ShoppingCart");
+                //if (cart != null)
+                //{
+                //    string result = await ShopingCartService.PostCart(cart, authResponce.Token);
+                //}
+                //await localStorage.SetItemAsync<ShoppingCart>("ShoppingCart", null);
+                NavigationManag.NavigateTo($"/login?token={encode(authResponce.Token)}", true);
+            }
+            else
+            {
+                var op = new BootstrapBlazor.Components.SwalOption()
+                    {
+                        Category = BootstrapBlazor.Components.SwalCategory.Error,
+                        Title = "Ошибка авторизации",
+                        Content = authResponce.Error,
+                        ShowClose = true,
+                        CloseButtonText = "Закрыть"
+                    };
+
+                await swalService?.Show(op);
+            }
+        }
+    }
+    private async Task RegClick()
+    {
+        NavigationManag.NavigateTo($"/sign-up", true);
+    }
+}
+

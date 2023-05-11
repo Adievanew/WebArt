@@ -1,0 +1,10 @@
+﻿@page "/"
+@namespace WebArt.Pages
+@using WebArt.Models
+@addTagHelper *, Microsoft.AspNetCore.Mvc.TagHelpers
+@{
+    Layout = "_Layout";
+
+}
+@model HostModel
+<component type="typeof(App)" render-mode="ServerPrerendered" />

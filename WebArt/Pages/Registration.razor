@@ -1,0 +1,95 @@
+﻿@page "/sign-up"
+@using System.Web;
+@using Microsoft.AspNetCore.Http
+@inject Blazored.LocalStorage.ILocalStorageService localStorage
+@inject NavigationManager NavigationManager
+@inject IJSRuntime JSRuntime
+@using BootstrapBlazor.Components
+@using Microsoft.AspNetCore.Components.Web
+@inject BootstrapBlazor.Components.ToastService ToastService
+
+<PageTitle>Регистрация</PageTitle>
+<div class="d-flex flex-column center-div gap-20">
+    <h1>Регистрация</h1>
+    <div class="d-flex flex-column center-div gap-20">
+         <div><BootstrapInput @bind-Value="@CurrentUser.Name" PlaceHolder="Имя" IsTrim="true" ShowLabel="true" DisplayText="Имя" /></div>
+         <div>
+            <label for="phone-mask" class="form-label">Телефон</label>
+            <input @bind="@CurrentUser.Login" type="tel" id="phone-mask" class="form-control modified" placeholder="+7(000)000-00-00" />
+        </div>
+         <div><BootstrapInput @bind-Value="@CurrentUser.Password" PlaceHolder="Пароль" IsTrim="true" ShowLabel="true" DisplayText="Пароль" type="password" /></div>
+
+        <BootstrapBlazor.Components.Button ButtonType="BootstrapBlazor.Components.ButtonType.Submit" IsAsync="true" OnClick=@Regist>Зарегистрироваться</BootstrapBlazor.Components.Button>
+    </div>
+</div>
+
+@code {
+    public User CurrentUser { get; set; } = new User();
+
+    [Inject]
+    private BootstrapBlazor.Components.SwalService swalService { get; set; }
+
+    public async Task Regist()
+    {
+        if (CurrentUser.Validate())
+        {
+            if (CurrentUser.ValidatePhone())
+            {
+               // CurrentUser.role = "Customer";
+                    var res = await HTTPService.SendListAsync<User>("Users", HttpMethod.Post, CurrentUser);
+                    if (res.HasErrors)
+                    {
+                        ErrorMessage("Ошибка запроса " + res.Error);
+                    }
+                    else
+                    {
+                        var authResponce = await ArtLib.Auth.Login(CurrentUser.Login, CurrentUser.Password);
+                        if (authResponce.User != null)
+                        {
+                            //ShoppingCart cart = await localStorage.GetItemAsync<ShoppingCart>("ShoppingCart");
+                            //if (cart != null)
+                            //{
+                            //    string result = await ShopingCartService.PostCart(cart, authResponce.Token);
+                            //}
+                            //await localStorage.SetItemAsync<ShoppingCart>("ShoppingCart", null);
+                            NavigationManag.NavigateTo($"/login?token={encode(authResponce.Token)}", true);
+                        }
+                    }
+              
+            }
+            else ErrorMessage("Номер телефона указан неверно");
+        }
+        else
+        {
+            ErrorMessage("Заполните все поля");
+        }
+    }
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
+        {
+            await JSRuntime.InvokeVoidAsync("masks");
+        }
+    }
+    private string encode(string param)
+    {
+        return HttpUtility.UrlEncode(param);
+    }
+
+    private void ErrorMessage(string ex)
+    {
+        ToastService.Show(new BootstrapBlazor.Components.ToastOption()
+            {
+                // Notification category
+                Category = BootstrapBlazor.Components.ToastCategory.Error,
+
+                // Notification box Title value
+                Title = "Ошибка",
+
+                // Notification body content
+                Content = ex
+            });
+    }
+}
+

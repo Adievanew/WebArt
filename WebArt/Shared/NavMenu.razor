@@ -1,0 +1,110 @@
+﻿@using BootstrapBlazor.Components
+@using AntDesign
+<nav class="navbar navbar-expand-lg" >
+    <a class="navbar-brand logo" href="/"></a>
+    <a style="font-weight: 700;font-size: 20px; margin-right: 10px" href="tel:+79172416373" class="phone-link-header">
+        <Icon Type="phone" Theme="outline" class="icons" />
+    </a>
+    <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarTogglerDemo02" aria-controls="navbarTogglerDemo02" aria-expanded="false" aria-label="Toggle navigation">
+        <span class="navbar-toggler-icon"></span>
+    </button>
+
+    <div class="collapse navbar-collapse" id="navbarTogglerDemo02">
+        <ul class="navbar-nav mr-auto mt-2 mt-lg-0">
+            <li class="nav-item">
+                <div class="d-flex gap-20" style="justify-content: space-between;">
+                    <NavLink href="/catalog">
+                        <BootstrapBlazor.Components.Button style="font-size: 20px;">Главная</BootstrapBlazor.Components.Button>
+                    </NavLink>
+                    <div class="d-flex">
+                        <BootstrapBlazor.Components.BootstrapInput @bind-Value="@Search" PlaceHolder="Поиск" IsTrim="true" OnEnterAsync="OnEnterAsync" style="max-width: 250px;" />
+                        <BootstrapBlazor.Components.Button OnClick="SearchClick"><Icon Type="search" Theme="outline" class="icons" /></BootstrapBlazor.Components.Button>
+                    </div>
+                </div>
+            </li>
+        </ul>
+       <div class="d-flex align-items-center">
+      <!-- Icon -->
+      <a class="text-reset me-3" href="#">
+        <i class="fas fa-shopping-cart"></i>
+      </a>
+
+      <!-- Notifications -->
+      <div class="dropdown">
+        <a
+          class="text-reset me-3 dropdown-toggle hidden-arrow"
+          href="#"
+          id="navbarDropdownMenuLink"
+          role="button"
+          data-mdb-toggle="dropdown"
+          aria-expanded="false"
+        >
+          <i class="fas fa-bell"></i>
+          <span class="badge rounded-pill badge-notification bg-danger">1</span>
+        </a>
+        <ul
+          class="dropdown-menu dropdown-menu-end"
+          aria-labelledby="navbarDropdownMenuLink"
+        >
+          <li>
+            <a class="dropdown-item" href="#">Some news</a>
+          </li>
+          <li>
+            <a class="dropdown-item" href="#">Another news</a>
+          </li>
+          <li>
+            <a class="dropdown-item" href="#">Something else here</a>
+          </li>
+        </ul>
+      </div>
+      <!-- Avatar -->
+      <div class="dropdown">
+        <a
+          class="dropdown-toggle d-flex align-items-center hidden-arrow"
+          href="/profile"
+          id="navbarDropdownMenuAvatar"
+          role="button"
+          data-mdb-toggle="dropdown"
+          aria-expanded="false"
+        >
+          <img
+            src=" "
+            class="rounded-circle"
+            height="25"
+            alt ="user"
+            loading="lazy"
+          />
+        </a>
+        <ul
+          class="dropdown-menu dropdown-menu-end"
+          aria-labelledby="navbarDropdownMenuAvatar"
+        >
+          <li>
+            <a class="dropdown-item" href="#">My profile</a>
+          </li>
+          <li>
+            <a class="dropdown-item" href="#">Settings</a>
+          </li>
+          <li>
+            <a class="dropdown-item" href="#">Logout</a>
+          </li>
+        </ul>
+      </div>
+    </div>
+    </div>
+</nav>
+
+@code {
+    public string Search { get; set; }
+
+    private async Task OnEnterAsync(string val)
+    {
+        if (Search != "") NavigationManag.NavigateTo($"catalog?search=" + Search);
+    }
+
+    private async Task SearchClick()
+    {
+        OnEnterAsync(Search);
+    }
+}
+

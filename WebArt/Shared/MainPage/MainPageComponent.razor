@@ -1,0 +1,36 @@
+﻿@inject NavigationManager NavigationManager
+@using BootstrapBlazor.Components
+<h3>MainPageComponent</h3>
+
+ <div class="my-orders">
+        @if (Ads.Count > 0)
+        
+          {
+            @foreach (var ads in Ads)
+            {<div class="card">
+                   <h5 class="card-header">@ads.Name</h5>
+                   <div class="card-body">
+                        
+                        <p class="card-text">@ads.Description</p>
+                    <BootstrapBlazor.Components.Button ButtonType="BootstrapBlazor.Components.ButtonType.Submit" IsAsync="true" OnClick=@Otklik>Откликнуться</BootstrapBlazor.Components.Button>
+
+                </div>
+             </div>
+
+            }
+          }
+</div>
+
+@code {
+    [CascadingParameter(Name = "Token")]
+    public string Token { get; set; }
+
+    [CascadingParameter(Name = "IsAuthorized")]
+    public bool IsAuthorized { get; set; }
+
+    private List<Ad> Ads { get; set; } = new List<Ad>();
+
+  public async Task Otklik()
+    {
+    }
+}
