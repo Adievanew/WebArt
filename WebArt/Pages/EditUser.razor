@@ -1,0 +1,152 @@
+﻿@page "/edituser"
+@using System.Web;
+@using AntDesign;
+@using Microsoft.AspNetCore.Http;
+@using WebArt.Models;
+@inject Blazored.LocalStorage.ILocalStorageService localStorage
+@inject NavigationManager NavigationManager
+@inject IJSRuntime JSRuntime
+@using BootstrapBlazor.Components
+@using Microsoft.AspNetCore.Components.Web;
+@inject BootstrapBlazor.Components.ToastService ToastService
+@implements IDisposable
+@inject IMessageService _message
+
+<PageTitle>Профиль</PageTitle>
+<div class="container mt-5">
+    <div class="row d-flex justify-content-center">
+      <div class="col-md-7">
+      <div class="d-flex flex-column center-div account-data">
+        <h2>Личные данные</h2>
+        <img src="@CurrentUser.FullImageLink" alt="" class="round" width="100" height="100">
+         <InputFile OnChange="HandleFileUpload" />
+        <BootstrapInput @bind-Value="@CurrentUser.Login" PlaceHolder="Логин" IsTrim="true" ShowLabel="true" DisplayText="Логин" />
+        <BootstrapInput @bind-Value="@CurrentUser.Name" PlaceHolder="Имя" IsTrim="true" ShowLabel="true" DisplayText="Имя" />
+        <BootstrapInput @bind-Value="@CurrentUser.Password" PlaceHolder="Пароль" IsTrim="true" ShowLabel="true" DisplayText="Пароль"/>
+         <DatePicker @bind-Value="@CurrentUser.BirthDay" DisplayText="Дата рождения" PlaceHolder="Дата рождения" IsTrim="true" ShowLabel="true" />
+        @*<DatePicker TValue="DateTime?" Picker="@CurrentUser.BirthDay"  PlaceHolder="Дата рождения" IsTrim="true" ShowLabel="true" DisplayText="Дата рождения" />*@
+        <BootstrapInput @bind-Value="@CurrentUser.Description"  PlaceHolder="Описание" IsTrim="true" ShowLabel="true" DisplayText="Описание" type='phone' />
+        <BootstrapInput @bind-Value="@CurrentUser.City" PlaceHolder="Город" IsTrim="true" ShowLabel="true" DisplayText="Город" />
+        <BootstrapBlazor.Components.Button OnClick=@SaveChanges>Сохранить</BootstrapBlazor.Components.Button>
+        <BootstrapBlazor.Components.Button OnClick=@Logout Color="BootstrapBlazor.Components.Color.Danger">Выйти</BootstrapBlazor.Components.Button>
+
+    </div>
+            
+</div>
+</div>
+</div>
+
+@code {
+
+    [CascadingParameter]
+    private Task<AuthenticationState>? authenticationState { get; set; }
+
+    [CascadingParameter(Name = "Token")]
+    public string Token { get; set; }
+
+    [CascadingParameter(Name = "IsAuthorized")]
+    public bool IsAuthorized { get; set; }
+    bool loading = false;
+
+    string imageUrl;
+
+  
+    public User CurrentUser { get; set; } = new User();
+
+    protected override async Task OnInitializedAsync()
+    {
+        if (!IsAuthorized) NavigationManager.NavigateTo("/auth");
+        if (authenticationState is not null)
+        {
+            var authState = await authenticationState;
+            var user = authState?.User;
+
+            if (user is not null)
+            {
+                if (user.Identity is not null && user.Identity.IsAuthenticated)
+                {
+                    var tokenClaim = user.FindFirst("Token");
+                    if (tokenClaim != null)
+                    {
+                        User? temp_user = await ArtLib.Auth.GetUserByToken(tokenClaim.Value);
+                        if (temp_user == null) NavigationManager.NavigateTo("/logout?returnUrl=/", true);
+                        else CurrentUser = temp_user;
+                    }
+                    else NavigationManager.NavigateTo("/logout?returnUrl=/", true);
+                }
+            }
+        }
+    }
+
+    private async Task SaveChanges()
+    {
+        await HttpRequests<User>.PutRequest("Users/" + CurrentUser.Id, CurrentUser);
+
+        ErrorMessage("Изменения сохранены" );
+    }
+    private void ErrorMessage(string ex)
+    {
+        ToastService.Show(new BootstrapBlazor.Components.ToastOption()
+            {
+                // Notification category
+                Category = BootstrapBlazor.Components.ToastCategory.Error,
+
+                // Notification box Title value
+                Title = "Ошибка",
+
+                // Notification body content
+                Content = ex
+            });
+    }
+    private async Task Logout()
+    {
+        NavigationManag.NavigateTo($"/logout?returnUrl=/", true);
+    }
+
+    public void Dispose()
+    {
+        ReadAvatarToken?.Cancel();
+        GC.SuppressFinalize(this);
+    }
+
+    private CancellationTokenSource? ReadAvatarToken { get; set; }
+
+
+    private async void HandleFileUpload(InputFileChangeEventArgs e)
+    {
+        try{
+            var image = e.File;
+            if (image != null && image.Size > 0)
+            {
+                // Конвертируем файл в массив байтов
+                var buffer = new byte[image.Size];
+                await image.OpenReadStream().ReadAsync(buffer);
+
+                using (var client = new HttpClient())
+                {
+                    var content = new MultipartFormDataContent();
+                    var fileContent = new ByteArrayContent(buffer);
+                    fileContent.Headers.ContentType = System.Net.Http.Headers.MediaTypeHeaderValue.Parse("image/jpeg");
+                    content.Add(fileContent, "file", image.Name);
+
+                    var response = await WebArt.Models.Global.ClientNet.PostAsync("ImagesLink", content);
+
+                    var result = await response.Content.ReadAsStringAsync();
+                    if (response.IsSuccessStatusCode)
+                    {
+                        var parsedResult = Newtonsoft.Json.Linq.JObject.Parse(result);
+                        var uploadedFileName = parsedResult["fileName"].ToString();
+                        CurrentUser.Avatar = uploadedFileName.Replace("\\", "%5C%5C");
+                        InvokeAsync(StateHasChanged);
+                    }
+                }
+            }
+        }
+        catch (Exception ex)
+        {
+
+        }
+    }
+}
+
+

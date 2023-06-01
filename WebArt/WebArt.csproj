@@ -7,11 +7,6 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <Content Remove="Shared\HeaderComponent.razor" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <None Include="Shared\HeaderComponent.razor" />
     <None Include="wwwroot\css\bootstrap\bootstrap.min.css.map" />
     <None Include="wwwroot\css\open-iconic\FONT-LICENSE" />
     <None Include="wwwroot\css\open-iconic\font\fonts\open-iconic.svg" />
@@ -35,17 +30,21 @@
   </ItemGroup>
 
   <ItemGroup>
+    <Folder Include="resources\" />
+  </ItemGroup>
+
+  <ItemGroup>
     <Reference Include="ArtLib">
-      <HintPath>..\..\diplom\ArtLib\obj\Debug\net6.0\ArtLib.dll</HintPath>
+      <HintPath>..\..\ApiWebArt\ArtLib\bin\Debug\net6.0\ArtLib.dll</HintPath>
     </Reference>
   </ItemGroup>
 
   <ItemGroup>
-    <UpToDateCheckInput Remove="Shared\HeaderComponent.razor" />
+    <UpToDateCheckInput Remove="Pages\AddImage.razor" />
   </ItemGroup>
 
   <ItemGroup>
-    <_ContentIncludedByDefault Remove="Shared\HeaderComponent.razor" />
+    <_ContentIncludedByDefault Remove="Pages\AddImage.razor" />
   </ItemGroup>
 
 </Project>

@@ -1,18 +1,61 @@
-html {
-  font-size: 14px;
+@import url('open-iconic/font/css/open-iconic-bootstrap.min.css');
+
+html, body {
+    font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
 }
 
-@media (min-width: 768px) {
-  html {
-    font-size: 16px;
-  }
+h1:focus {
+    outline: none;
 }
 
-html {
-  position: relative;
-  min-height: 100%;
+h1, h2, h3, h4 {
+    color: #1b1f2a;
+    font-weight: 800;
 }
 
-body {
-  margin-bottom: 60px;
+a, .btn-link {
+    color: #ff9238;
+}
+
+.btn-primary {
+    color: #fff;
+    background-color: #1b6ec2;
+    border-color: #1861ac;
+}
+
+.round {
+    border-radius: 100px; /* Радиус скругления */
+    box-shadow: 0 0 0 3px green, 0 0 13px #333; /* Параметры теней */
+}
+
+.center-div {
+    display: flex;
+    flex-direction: row;
+    padding: 0px;
+    width: 500px;
+    margin: 0 auto;
+}
+
+.product-card {
+    
+    width: 170px;
+    height: 350px;
+    margin: 10px;
+    flex-direction: column;
+    justify-content: start;
+    align-items: flex-start;
+    padding: 0px;
+    gap: 10px;
+    display: flex;
+}
+
+.product-card-image {
+    border-radius: 10px;
+    width: 100%;
+    height: 170px;
+   
+}
+
+.inline {
+    display: inline-block;
 }

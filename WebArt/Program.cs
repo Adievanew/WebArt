@@ -6,6 +6,7 @@ using Microsoft.AspNetCore.Http;
 using System.Net.Http;
 using Blazored.LocalStorage;
 using WebArt.Services;
+using Microsoft.AspNetCore.SignalR;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -32,6 +33,7 @@ builder.Services.AddBlazoredLocalStorage();   // local storage
 builder.Services.AddBlazoredLocalStorage(config => config.JsonSerializerOptions.WriteIndented = true);  // local storage
 builder.Services.AddSignalR();
 builder.Services.AddScoped<IUserSessionService, UserSessionService>();
+builder.Services.Configure<HubOptions>(option => option.MaximumReceiveMessageSize = null);
 var app = builder.Build();
 app.UseWebSockets();
 // Configure the HTTP request pipeline.

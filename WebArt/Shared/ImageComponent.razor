@@ -1,0 +1,31 @@
+﻿@using WebArt.Shared
+@using BootstrapBlazor.Components
+@using System.Collections.ObjectModel
+@inject Blazored.LocalStorage.ILocalStorageService localStorage
+@inject BootstrapBlazor.Components.ToastService ToastService
+
+
+<div class="product-card">
+    <p>@image.Name</p>
+   
+       
+            <img src="@image.FullImageLink" class="product-card-image" />
+       
+</div> 
+
+@code {
+    public Image image = new Image();
+    [Parameter]
+    public int Id { get; set; }
+    [CascadingParameter(Name = "Token")]
+    public string Token { get; set; }
+    public User CurrentUser { get; set; } = new User();
+    [CascadingParameter(Name = "IsAuthorized")]
+    public bool IsAuthorized { get; set; }
+    protected override async Task OnParametersSetAsync()
+    {
+
+        image = (await BaseHttpServices<Image>.SendListAsync<Image>("Images/" + Id, HttpMethod.Get)).FirstOrDefault();
+
+    }
+}

@@ -6,9 +6,10 @@
 @inject IHttpContextAccessor httpContextAccessor
 @inject Blazored.LocalStorage.ILocalStorageService localStorage
 @inject NavigationManager NavigationManager
-@using BootstrapBlazor.Components
+@*@using BootstrapBlazor.Components*@
 @inject IJSRuntime JS;
-
+@using System.Collections.ObjectModel;
+@using AntDesign;
 <PageTitle>Профиль</PageTitle>
 <div class="container mt-5">
 
@@ -18,8 +19,8 @@
 
             <div class="card p-3 py-4">
 
-                <div class="text-center">
-                    <img bind-value="@CurrentUser.Avatar" width="100" class="rounded-circle">
+                <div class="text-center ">
+                    <img src="@CurrentUser.FullImageLink" width="100" class="round">
                 </div>
 
 
@@ -32,8 +33,10 @@
                         <p class="fonts">@CurrentUser.Description</p>
 
                     </div>
-
-                 
+                    @*<Registration/>*@
+                     <NavLink href="/edituser">
+                        <BootstrapBlazor.Components.Button style="font-size: 20px;">Редактировать</BootstrapBlazor.Components.Button>
+                    </NavLink>
 
 
                 </div>
@@ -47,26 +50,159 @@
 
     </div>
 
+    
+   
+  
 </div>
 
+<Tabs @bind-ActiveKey="@activeKey" OnChange="OnTabChange" >
+	  <TabPane Tab="Портфолио" Key="1">
+        
+                @if (Images == null || Images.Count == 0)
+                {
+                    <div class="" style="display: block;">
+                        <div style="height: 300px; display: block; margin-right: auto;text-align: center;vertical-align: middle;line-height: 300px;display: block;">
+                            <a href="/addImage"><h3>Создайте свое портфолио. Нажми!</h3></a>
+
+                        </div>
+                    </div>
+                }
+                else
+                {
+                    @foreach (var prod in Images)
+                    {
+                        <div class="inline"><ImageComponent Id="@prod.Id"></ImageComponent></div>
+                    }
+                }
+         
+    </TabPane>
+    <TabPane Tab="Мои Заказы" Key="2">
+        <div>
+            @if (ads == null || ads.Count == 0)
+            {
+                <div class="" style="display: block;">
+                    <div style="height: 300px; display: block; margin-right: auto;text-align: center;vertical-align: middle;line-height: 300px;display: block;">
+                        <a href="/addad"><h3>Создайте свое портфолио. Нажми!</h3></a>
+
+                    </div>
+                </div>
+            }
+            else
+            {
+                @foreach (var prod in ads)
+                {
+                    <div class="inline"><AdsComponent Id="@prod.Id"></AdsComponent></div>
+                }
+            }
+        </div>
+    </TabPane>
+    <TabPane Tab="Мои Услуги" Key="3">
+        <div>
+            @if (ser == null || ser.Count == 0)
+            {
+                <div class="" style="display: block;">
+                    <div style="height: 300px; display: block; margin-right: auto;text-align: center;vertical-align: middle;line-height: 300px;display: block;">
+                        <a href="/addad"><h3>Создайте свое портфолио. Нажми!</h3></a>
+
+                    </div>
+                </div>
+            }
+            else
+            {
+                @foreach (var prod in ser)
+                {
+                    <div class="inline"><ServicesComponent Id="@prod.Id"></ServicesComponent></div>
+                }
+            }
+        </div>
+    </TabPane>
+    <TabPane Tab="Мои Отклики" Key="4">
+        <div>
+            <Select TItem="Item"
+                    TItemValue="string"
+                    DataSource="@_items"
+                    @bind-Value="@_selectedValue"
+                    ValueName="@nameof(Item.Name)"
+                    LabelName="@nameof(Item.Name)"
+                    DefaultActiveFirstOption
+                    Style="width: 200px;"
+                    OnSelectedItemChanged="OnSelectedItemChangedHandler">
+                <ItemTemplate>
+                    <span>@((context as Item).Name)</span>
+                </ItemTemplate>
+            </Select>
+        </div>
+        <div>
+            @if (_selectedValue == "Заказы" )
+            {
+                @foreach (var prod in ser)
+                {
+                    <div class="inline"><AdsComponent Id="@prod.Id"></AdsComponent></div>
+                }
+            }
+            @if (_selectedValue == "Услуги")
+            {
+                @foreach (var prod in ser)
+                {
+                    <div class="inline"><ServicesComponent Id="@prod.Id"></ServicesComponent></div>
+                }
+            }
+            else
+            {
+                <div class="" style="display: block;">
+                    <div style="height: 300px; display: block; margin-right: auto;text-align: center;vertical-align: middle;line-height: 300px;display: block;">
+                        <a href="/"><h3>Здесь пока ничего нет. Нажми!</h3></a>
+
+                    </div>
+                </div>
+            }
+        </div>
+    </TabPane>
+</Tabs>
+
 @code {
+     public class Item
+    {
+        public string Name { get; set; }
+       
+    }
+
+    List<Item> _items;
+    string _selectedValue;
+	Item _selectedItem;
+
+	
+	private void OnSelectedItemChangedHandler(Item value)
+    {
+        _selectedItem = value;
+		Console.WriteLine($"selected: ${value?.Name}");
+    }
     [CascadingParameter]
     private Task<AuthenticationState>? authenticationState { get; set; }
+
+    public string activeKey { get; set; } = "1";
 
     [CascadingParameter(Name = "Token")]
     public string Token { get; set; }
 
+    void OnTabChange(string key)
+    {
+        Console.WriteLine($"tab change:{key}");
+    }
+
     [CascadingParameter(Name = "IsAuthorized")]
     public bool IsAuthorized { get; set; }
 
-    private static string PhoneFormatter(string source) => String.Format("{0:(###) ###-####}", source);
+   
     public User CurrentUser { get; set; } = new User();
 
-    public List<Image> Images { get; set; }
+    public ObservableCollection<ArtLib.Image> Images { get; set; } = new ObservableCollection<ArtLib.Image>();
+    public ObservableCollection<ArtLib.Ad> ads { get; set; } = new ObservableCollection<ArtLib.Ad>();
+    public ObservableCollection<ArtLib.Service> ser { get; set; } = new ObservableCollection<ArtLib.Service >();
 
     protected override async Task OnInitializedAsync()
     {
-        if (!IsAuthorized) NavigationManager.NavigateTo("/auth");
+        if (!IsAuthorized) NavigationManager.NavigateTo("/auth", true);
         if (authenticationState is not null)
         {
             var authState = await authenticationState;
@@ -82,26 +218,47 @@
                         User? temp_user = await ArtLib.Auth.GetUserByToken(tokenClaim.Value);
                         if (temp_user == null) NavigationManager.NavigateTo("/logout?returnUrl=/", true);
                         else CurrentUser = temp_user;
+                         await GetAds();
+                         await  GetImages();
+                         await  GetService();
+                        _items = new List<Item>
+        {
+            new Item {  Name = "Заказы"},
+            new Item {  Name = "Услуги"}
+        };
                     }
                     else NavigationManager.NavigateTo("/logout?returnUrl=/", true);
                 }
-            }
+            } 
         }
     }
 
-    private async Task SaveChanges()
-    {
+   
 
+    //private Task OnChanged(CollapseItem item)
+    //{
+    //    return Task.CompletedTask;
+    //}
+   
+    private async Task GetImages()
+    {
+        //Products = new ObservableCollection<ShopLib.Product>(); адрес/api/image
+        Images = new ObservableCollection<ArtLib.Image>(await BaseHttpServices<ArtLib.Image>.SendListAsync<ArtLib.Image>("Images/user?id=" + CurrentUser.Id, HttpMethod.Get));
+        //if (Images == null) Images = new ObservableCollection<ArtLib.Image>();
+    }
+    private async Task GetAds()
+    {
+        //Products = new ObservableCollection<ShopLib.Product>(); адрес/api/image
+        ads = new ObservableCollection<ArtLib.Ad>(await BaseHttpServices<ArtLib.Ad>.SendListAsync<ArtLib.Ad>("Ads/user?userid=" + CurrentUser.Id, HttpMethod.Get));
+       // if (ads == null) ads = new ObservableCollection<ArtLib.Ad>();
+    }
+    private async Task GetService()
+    {
+        //Products = new ObservableCollection<ShopLib.Product>(); адрес/api/image
+        ser = new ObservableCollection<ArtLib.Service>(await BaseHttpServices<ArtLib.Service>.SendListAsync<ArtLib.Service>("Services/user?id=" + CurrentUser.Id, HttpMethod.Get));
+       // if (ser == null) ser = new ObservableCollection<ArtLib.Service>();
     }
 
-    private async Task Logout()
-    {
-        NavigationManag.NavigateTo($"/logout?returnUrl=/", true);
-    }
 
-    private Task OnChanged(CollapseItem item)
-    {
-        return Task.CompletedTask;
-    }
 }
 

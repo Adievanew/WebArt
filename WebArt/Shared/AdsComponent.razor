@@ -1,0 +1,131 @@
+﻿@using WebArt.Shared
+@using BootstrapBlazor.Components
+@using System.Collections.ObjectModel
+@inject Blazored.LocalStorage.ILocalStorageService localStorage
+@inject BootstrapBlazor.Components.ToastService ToastService
+@inject NavigationManager NavigationManager
+@using Microsoft.AspNetCore.Http
+@using AntDesign;
+<div
+    class="d-flex flex-column center-div">
+<NavLink href=@GetHref() >
+    <AntDesign.Card Title="@ad.Name" Hoverable Style="width:500px; auto; margin:20px; ">
+       @* <Extra>
+            <h5 class="card-header"></h5>
+        </Extra>*@
+        <Body >
+           <div>
+            <p class="card-title">@ad.Description</p>
+            <p class="card-body">@ad.Cost р</p>
+            </div>
+           
+     
+        </Body>
+        <ChildContent >
+            <AntDesign.Avatar Src=@srcAva></AntDesign.Avatar>
+            <AntDesign.Title>@ad.User?.Name</AntDesign.Title>
+            <AntDesign.Descriptions>@srcDate</AntDesign.Descriptions>
+
+
+            @if (resp.Count == 0)
+            {
+                <BootstrapBlazor.Components.Button IsAsync="true" OnClick="@Otklik" class="product-cart-btn">Отклинуться</BootstrapBlazor.Components.Button>
+            }
+            else
+            {
+                <BootstrapBlazor.Components.Button IsDisabled="true" class="product-cart-btn">Откликнуться</BootstrapBlazor.Components.Button>
+            }
+        </ChildContent>
+
+</AntDesign.Card>
+</NavLink>
+</div>
+@code {
+    RenderFragment avatarTemplate = @<AntDesign.Avatar Src=srcAva></AntDesign.Avatar>;
+    public List<ResponceAd> resp { get; set; } = new List<ResponceAd>();
+    public Ad ad = new Ad();
+    public ResponceAd responce = new ResponceAd();
+    [Parameter]
+    public int Id { get; set; }
+    [CascadingParameter(Name = "Token")]
+    public string Token { get; set; }
+    public User CurrentUser { get; set; } = new User();
+    [CascadingParameter(Name = "IsAuthorized")]
+    public bool IsAuthorized { get; set; }
+    public string srcAva;
+    public string srcDate;
+    [CascadingParameter]
+    private Task<AuthenticationState>? authenticationState { get; set; }
+
+    private string GetHref()
+    {
+        return "adcard/" + ad.Id;
+    }
+    private string GetHrefuser()
+    {
+        return "userprofile/" + ad.Id;
+    }
+
+
+    protected override async Task OnInitializedAsync()
+    {
+        if (!IsAuthorized) NavigationManager.NavigateTo("/auth");
+        if (authenticationState is not null)
+        {
+            var authState = await authenticationState;
+            var user = authState?.User;
+
+            if (user is not null)
+            {
+                if (user.Identity is not null && user.Identity.IsAuthenticated)
+                {
+                    var tokenClaim = user.FindFirst("Token");
+                    if (tokenClaim != null)
+                    {
+                        User? temp_user = await ArtLib.Auth.GetUserByToken(tokenClaim.Value);
+                        if (temp_user == null) NavigationManager.NavigateTo("/logout?returnUrl=/", true);
+                        else CurrentUser = temp_user;
+
+                        ad = (await BaseHttpServices<Ad>.SendListAsync<Ad>("Ads/" + Id, HttpMethod.Get)).FirstOrDefault();
+                        GetResponse();
+                        srcAva = ad.User?.FullImageLink;
+                        srcDate = Convert.ToString(ad.Date);
+                        InvokeAsync(StateHasChanged);
+                    }
+                    else NavigationManager.NavigateTo("/logout?returnUrl=/", true);
+                }
+            }
+        }
+    }
+    public bool IsAvailable { get; set; } = false;
+
+    private async Task GetResponse()
+    {
+        resp = new List<ResponceAd>(await BaseHttpServices<ResponceAd>.SendListAsync<ResponceAd>("Responcesad/user?userId=" + CurrentUser.Id + "&adId=" +ad.Id, HttpMethod.Get));
+        InvokeAsync(StateHasChanged);
+    }
+    private async Task Otklik()
+    {
+        responce.AdId = ad.Id;
+        //responce.Ads = ad;
+        responce.UserId = CurrentUser.Id;
+        responce = (await BaseHttpServices<ResponceAd>.SendListAsync<ResponceAd>("ResponcesAd/", HttpMethod.Post, responce)).FirstOrDefault();
+        ErrorMessage("Отклик доставлен");
+        GetResponse();
+    }
+    private void ErrorMessage(string ex)
+    {
+        ToastService.Show(new BootstrapBlazor.Components.ToastOption()
+            {
+                // Notification category
+                Category = BootstrapBlazor.Components.ToastCategory.Success,
+
+                // Notification box Title value
+                Title = "Уведомление",
+
+                // Notification body content
+                Content = ex
+            });
+    }
+   
+}

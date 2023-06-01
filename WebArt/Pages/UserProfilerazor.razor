@@ -1,0 +1,183 @@
+﻿
+@using System.Web;
+@using ArtLib;
+@using Microsoft.AspNetCore.Http
+@inject IHttpContextAccessor httpContextAccessor
+@inject Blazored.LocalStorage.ILocalStorageService localStorage
+@inject NavigationManager NavigationManager
+@*@using BootstrapBlazor.Components*@
+@inject IJSRuntime JS;
+@using System.Collections.ObjectModel;
+@using AntDesign;
+
+@page "/userprofile/{Id:int}"
+<PageTitle>Профиль</PageTitle>
+
+<div class="container mt-5">
+
+    <div class="row d-flex justify-content-center">
+
+        <div class="col-md-7">
+
+            <div class="card p-3 py-4">
+
+                <div class="text-center">
+                    <img bind-value="@CurrentUser.FullImageLink" width="100" class="rounded-circle">
+                </div>
+
+
+                <div class="text-center mt-3">
+                    <span class="bg-secondary p-1 px-4 rounded text-white">Pro</span>
+                    <div class="mt-2 mb-0">@CurrentUser.Name</div>
+                    <span>@CurrentUser.City</span>
+
+                    <div class="px-4 mt-1">
+                        <p class="fonts">@CurrentUser.Description</p>
+
+                    </div>
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</div>
+
+<Tabs @bind-ActiveKey="@activeKey" OnChange="OnTabChange">
+    <TabPane Tab="Портфолио" Key="1">
+        <div>
+            @if (Images == null || Images.Count == 0)
+            {
+                <div class="" style="display: block;">
+                    <div style="height: 300px; display: block; margin-right: auto;text-align: center;vertical-align: middle;line-height: 300px;display: block;">
+                        <a href="/addImage"><h3>Здесь пока ничего нет :( !</h3></a>
+
+                    </div>
+                </div>
+            }
+            else
+            {
+                @foreach (var prod in Images)
+                {
+                    <div class="inline"><ImageComponent Id="@prod.Id"></ImageComponent></div>
+                }
+            }
+        </div>
+    </TabPane>
+    <TabPane Tab="Мои Заказы" Key="2">
+        <div>
+            @if (ads == null || ads.Count == 0)
+            {
+                <div class="" style="display: block;">
+                    <div style="height: 300px; display: block; margin-right: auto;text-align: center;vertical-align: middle;line-height: 300px;display: block;">
+                        <a href="/addad"><h3>СЗдесь пока ничего нет :( !</h3></a>
+
+                    </div>
+                </div>
+            }
+            else
+            {
+                @foreach (var prod in ads)
+                {
+                    <div class="inline"><AdsComponent Id="@prod.Id"></AdsComponent></div>
+                }
+            }
+        </div>
+    </TabPane>
+    <TabPane Tab="Мои Услуги" Key="3">
+        <div>
+            @if (ser == null || ser.Count == 0)
+            {
+                <div class="" style="display: block;">
+                    <div style="height: 300px; display: block; margin-right: auto;text-align: center;vertical-align: middle;line-height: 300px;display: block;">
+                        <a href="/addad"><h3>Здесь пока ничего нет :( !</h3></a>
+
+                    </div>
+                </div>
+            }
+            else
+            {
+                @foreach (var prod in ser)
+                {
+                    <div class="inline"><ServicesComponent Id="@prod.Id"></ServicesComponent></div>
+                }
+            }
+        </div>
+    </TabPane>
+</Tabs>
+@code {
+    [CascadingParameter]
+    private Task<AuthenticationState>? authenticationState { get; set; }
+
+    public string activeKey { get; set; } = "1";
+
+    [CascadingParameter(Name = "Token")]
+    public string Token { get; set; }
+
+    void OnTabChange(string key)
+    {
+        Console.WriteLine($"tab change:{key}");
+    }
+    [Parameter]
+    public int Id { get; set; }
+    [CascadingParameter(Name = "IsAuthorized")]
+    public bool IsAuthorized { get; set; }
+
+
+    public User CurrentUser { get; set; } = new User();
+    public User userU { get; set; } = new User();
+
+    public ObservableCollection<ArtLib.Image> Images { get; set; } = new ObservableCollection<ArtLib.Image>();
+    public ObservableCollection<ArtLib.Ad> ads { get; set; } = new ObservableCollection<ArtLib.Ad>();
+    public ObservableCollection<ArtLib.Service> ser { get; set; } = new ObservableCollection<ArtLib.Service>();
+
+    protected override async Task OnInitializedAsync()
+    {
+        if (!IsAuthorized) NavigationManager.NavigateTo("/auth", true);
+        if (authenticationState is not null)
+        {
+            var authState = await authenticationState;
+            var user = authState?.User;
+
+            if (user is not null)
+            {
+                if (user.Identity is not null && user.Identity.IsAuthenticated)
+                {
+                    var tokenClaim = user.FindFirst("Token");
+                    if (tokenClaim != null)
+                    {
+                        User? temp_user = await ArtLib.Auth.GetUserByToken(tokenClaim.Value);
+                        if (temp_user == null) NavigationManager.NavigateTo("/logout?returnUrl=/", true);
+                        else { CurrentUser = temp_user;
+                              userU = await BaseHttpServices<ArtLib.User>.SendAsync<ArtLib.User>("Users" + Id, HttpMethod.Get); }
+                        ;
+                        await GetAds();
+                        await GetImages();
+                        await GetService();
+                    }
+                    else NavigationManager.NavigateTo("/logout?returnUrl=/", true);
+                }
+            }
+        }
+    }
+    private async Task GetImages()
+    {
+        //Products = new ObservableCollection<ShopLib.Product>(); адрес/api/image
+        Images = new ObservableCollection<ArtLib.Image>(await BaseHttpServices<ArtLib.Image>.SendListAsync<ArtLib.Image>("Images/user?id=" + CurrentUser.Id, HttpMethod.Get));
+        //if (Images == null) Images = new ObservableCollection<ArtLib.Image>();
+    }
+    private async Task GetAds()
+    {
+        //Products = new ObservableCollection<ShopLib.Product>(); адрес/api/image
+        ads = new ObservableCollection<ArtLib.Ad>(await BaseHttpServices<ArtLib.Ad>.SendListAsync<ArtLib.Ad>("Ads/user?userid=" + CurrentUser.Id, HttpMethod.Get));
+        // if (ads == null) ads = new ObservableCollection<ArtLib.Ad>();
+    }
+    private async Task GetService()
+    {
+        //Products = new ObservableCollection<ShopLib.Product>(); адрес/api/image
+        ser = new ObservableCollection<ArtLib.Service>(await BaseHttpServices<ArtLib.Service>.SendListAsync<ArtLib.Service>("Services/user?id=" + CurrentUser.Id, HttpMethod.Get));
+        // if (ser == null) ser = new ObservableCollection<ArtLib.Service>();
+    }
+}

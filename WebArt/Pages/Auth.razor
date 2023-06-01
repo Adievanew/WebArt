@@ -6,6 +6,7 @@
 @inject IJSRuntime JSRuntime
 @using BootstrapBlazor.Components
 
+<div class="d-flex flex-column center-div">
 <PageTitle>Авторизация</PageTitle>
 <AuthorizeView>
     <Authorized>
@@ -24,6 +25,7 @@
         </div>
     </NotAuthorized>
 </AuthorizeView>
+</div>
 @code {
     [CascadingParameter]
     private Task<AuthenticationState>? authenticationState { get; set; }
@@ -62,7 +64,7 @@
     {
         if (firstRender)
         {
-            await JSRuntime.InvokeVoidAsync("masks");
+            //await JSRuntime.InvokeVoidAsync("masks");
         }
     }
     private string encode(string param)

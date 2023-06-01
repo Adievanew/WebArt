@@ -20,12 +20,32 @@ build_property._RazorSourceGeneratorDebug =
 build_metadata.AdditionalFiles.TargetPath = QXBwLnJhem9y
 build_metadata.AdditionalFiles.CssScope = 
 
+[C:/Users/Aigul/source/repos/WebArt/WebArt/Pages/AdCard.razor]
+build_metadata.AdditionalFiles.TargetPath = UGFnZXNcQWRDYXJkLnJhem9y
+build_metadata.AdditionalFiles.CssScope = 
+
+[C:/Users/Aigul/source/repos/WebArt/WebArt/Pages/Addad.razor]
+build_metadata.AdditionalFiles.TargetPath = UGFnZXNcQWRkYWQucmF6b3I=
+build_metadata.AdditionalFiles.CssScope = 
+
+[C:/Users/Aigul/source/repos/WebArt/WebArt/Pages/AddImage.razor]
+build_metadata.AdditionalFiles.TargetPath = UGFnZXNcQWRkSW1hZ2UucmF6b3I=
+build_metadata.AdditionalFiles.CssScope = 
+
+[C:/Users/Aigul/source/repos/WebArt/WebArt/Pages/Addservice.razor]
+build_metadata.AdditionalFiles.TargetPath = UGFnZXNcQWRkc2VydmljZS5yYXpvcg==
+build_metadata.AdditionalFiles.CssScope = 
+
 [C:/Users/Aigul/source/repos/WebArt/WebArt/Pages/Auth.razor]
 build_metadata.AdditionalFiles.TargetPath = UGFnZXNcQXV0aC5yYXpvcg==
 build_metadata.AdditionalFiles.CssScope = 
 
 [C:/Users/Aigul/source/repos/WebArt/WebArt/Pages/Counter.razor]
 build_metadata.AdditionalFiles.TargetPath = UGFnZXNcQ291bnRlci5yYXpvcg==
+build_metadata.AdditionalFiles.CssScope = 
+
+[C:/Users/Aigul/source/repos/WebArt/WebArt/Pages/EditUser.razor]
+build_metadata.AdditionalFiles.TargetPath = UGFnZXNcRWRpdFVzZXIucmF6b3I=
 build_metadata.AdditionalFiles.CssScope = 
 
 [C:/Users/Aigul/source/repos/WebArt/WebArt/Pages/FetchData.razor]
@@ -44,12 +64,44 @@ build_metadata.AdditionalFiles.CssScope =
 build_metadata.AdditionalFiles.TargetPath = UGFnZXNcUmVnaXN0cmF0aW9uLnJhem9y
 build_metadata.AdditionalFiles.CssScope = 
 
+[C:/Users/Aigul/source/repos/WebArt/WebArt/Pages/UserProfilerazor.razor]
+build_metadata.AdditionalFiles.TargetPath = UGFnZXNcVXNlclByb2ZpbGVyYXpvci5yYXpvcg==
+build_metadata.AdditionalFiles.CssScope = 
+
+[C:/Users/Aigul/source/repos/WebArt/WebArt/Shared/AdsComponent.razor]
+build_metadata.AdditionalFiles.TargetPath = U2hhcmVkXEFkc0NvbXBvbmVudC5yYXpvcg==
+build_metadata.AdditionalFiles.CssScope = 
+
+[C:/Users/Aigul/source/repos/WebArt/WebArt/Shared/Base.razor]
+build_metadata.AdditionalFiles.TargetPath = U2hhcmVkXEJhc2UucmF6b3I=
+build_metadata.AdditionalFiles.CssScope = 
+
 [C:/Users/Aigul/source/repos/WebArt/WebArt/Shared/FooterComponent.razor]
 build_metadata.AdditionalFiles.TargetPath = U2hhcmVkXEZvb3RlckNvbXBvbmVudC5yYXpvcg==
 build_metadata.AdditionalFiles.CssScope = 
 
+[C:/Users/Aigul/source/repos/WebArt/WebArt/Shared/HeaderComponent.razor]
+build_metadata.AdditionalFiles.TargetPath = U2hhcmVkXEhlYWRlckNvbXBvbmVudC5yYXpvcg==
+build_metadata.AdditionalFiles.CssScope = 
+
+[C:/Users/Aigul/source/repos/WebArt/WebArt/Shared/ImageComponent.razor]
+build_metadata.AdditionalFiles.TargetPath = U2hhcmVkXEltYWdlQ29tcG9uZW50LnJhem9y
+build_metadata.AdditionalFiles.CssScope = 
+
 [C:/Users/Aigul/source/repos/WebArt/WebArt/Shared/MainPage/MainPageComponent.razor]
 build_metadata.AdditionalFiles.TargetPath = U2hhcmVkXE1haW5QYWdlXE1haW5QYWdlQ29tcG9uZW50LnJhem9y
+build_metadata.AdditionalFiles.CssScope = 
+
+[C:/Users/Aigul/source/repos/WebArt/WebArt/Shared/NavMenu.razor]
+build_metadata.AdditionalFiles.TargetPath = U2hhcmVkXE5hdk1lbnUucmF6b3I=
+build_metadata.AdditionalFiles.CssScope = 
+
+[C:/Users/Aigul/source/repos/WebArt/WebArt/Shared/ResponcesAdComponent.razor]
+build_metadata.AdditionalFiles.TargetPath = U2hhcmVkXFJlc3BvbmNlc0FkQ29tcG9uZW50LnJhem9y
+build_metadata.AdditionalFiles.CssScope = 
+
+[C:/Users/Aigul/source/repos/WebArt/WebArt/Shared/ServicesComponent.razor]
+build_metadata.AdditionalFiles.TargetPath = U2hhcmVkXFNlcnZpY2VzQ29tcG9uZW50LnJhem9y
 build_metadata.AdditionalFiles.CssScope = 
 
 [C:/Users/Aigul/source/repos/WebArt/WebArt/Shared/SurveyPrompt.razor]
@@ -64,12 +116,16 @@ build_metadata.AdditionalFiles.CssScope =
 build_metadata.AdditionalFiles.TargetPath = U2hhcmVkXE1haW5MYXlvdXQucmF6b3I=
 build_metadata.AdditionalFiles.CssScope = b-x4mnrl8tmb
 
-[C:/Users/Aigul/source/repos/WebArt/WebArt/Shared/NavMenu.razor]
-build_metadata.AdditionalFiles.TargetPath = U2hhcmVkXE5hdk1lbnUucmF6b3I=
-build_metadata.AdditionalFiles.CssScope = b-c0kdbf4nmf
-
 [C:/Users/Aigul/source/repos/WebArt/WebArt/Pages/Error.cshtml]
 build_metadata.AdditionalFiles.TargetPath = UGFnZXNcRXJyb3IuY3NodG1s
+build_metadata.AdditionalFiles.CssScope = 
+
+[C:/Users/Aigul/source/repos/WebArt/WebArt/Pages/Login.cshtml]
+build_metadata.AdditionalFiles.TargetPath = UGFnZXNcTG9naW4uY3NodG1s
+build_metadata.AdditionalFiles.CssScope = 
+
+[C:/Users/Aigul/source/repos/WebArt/WebArt/Pages/Logout.cshtml]
+build_metadata.AdditionalFiles.TargetPath = UGFnZXNcTG9nb3V0LmNzaHRtbA==
 build_metadata.AdditionalFiles.CssScope = 
 
 [C:/Users/Aigul/source/repos/WebArt/WebArt/Pages/_Host.cshtml]

@@ -1,36 +1,77 @@
 ﻿@inject NavigationManager NavigationManager
-@using BootstrapBlazor.Components
-<h3>MainPageComponent</h3>
+@*@using BootstrapBlazor.Components*@
+@using System.Collections.ObjectModel;
+@using AntDesign;
 
- <div class="my-orders">
-        @if (Ads.Count > 0)
-        
-          {
-            @foreach (var ads in Ads)
-            {<div class="card">
-                   <h5 class="card-header">@ads.Name</h5>
-                   <div class="card-body">
-                        
-                        <p class="card-text">@ads.Description</p>
-                    <BootstrapBlazor.Components.Button ButtonType="BootstrapBlazor.Components.ButtonType.Submit" IsAsync="true" OnClick=@Otklik>Откликнуться</BootstrapBlazor.Components.Button>
 
+
+
+<!-- Pills navs -->
+<!-- Pills content -->
+<div
+    class="d-flex flex-column center-div">
+<Tabs @bind-ActiveKey="@activeKey" OnChange="OnTabChange" >
+	  <TabPane Tab="Заказы" Key="1">
+        <div>
+            @if (Ads == null || Ads.Count == 0)
+            {
+                <div class="" style="display: block;">
+                    <div style="height: 300px; display: block; margin-right: auto;text-align: center;vertical-align: middle;line-height: 300px;display: block;">
+                        <a href=""><h3>Заказы по заданными параметрам не найдены</h3></a>
+                    </div>
                 </div>
-             </div>
-
             }
-          }
+            else
+            {
+                @foreach (var prod in Ads)
+                {
+                    <div class="inline"><AdsComponent Id="@prod.Id"></AdsComponent></div>
+                }
+            }
+        </div>
+    </TabPane>
+    <TabPane Tab="Услуги" Key="2">
+        <div>
+            @if (Ser == null || Ser.Count == 0)
+            {
+                <div class="" style="display: block;">
+                    <div style="height: 300px; display: block; margin-right: auto;text-align: center;vertical-align: middle;line-height: 300px;display: block;">
+                        <a href=""><h3>Услуги по заданными параметрам не найдены</h3></a>
+                    </div>
+                </div>
+            }
+            else
+            {
+               
+                @foreach (var prod in Ser)
+                {
+                    <div class="inline"><ServicesComponent Id="@prod.Id"></ServicesComponent></div>
+                }
+            }
+        </div>
+    </TabPane>
+   
+</Tabs>
 </div>
-
 @code {
+    public string activeKey { get; set; } = "1";
+    private ObservableCollection<Ad> Ads { get; set; } = new ObservableCollection<Ad>();
+    private ObservableCollection<Service> Ser { get; set; } = new ObservableCollection<Service>();
     [CascadingParameter(Name = "Token")]
     public string Token { get; set; }
 
     [CascadingParameter(Name = "IsAuthorized")]
     public bool IsAuthorized { get; set; }
 
-    private List<Ad> Ads { get; set; } = new List<Ad>();
-
-  public async Task Otklik()
+     void OnTabChange(string key)
     {
+        Console.WriteLine($"tab change:{key}");
+    }
+
+    protected override async Task OnInitializedAsync()
+    {
+        Ads = new ObservableCollection<Ad>(await BaseHttpServices<Ad>.SendListAsync<Ad>("Ads/", HttpMethod.Get));
+        Ser = new ObservableCollection<Service>(await BaseHttpServices<Service>.SendListAsync<Service>("Services/", HttpMethod.Get));
+
     }
 }
