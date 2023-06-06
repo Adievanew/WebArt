@@ -1,0 +1,69 @@
+﻿@inject NavigationManager NavigationManager
+<div class="d-flex flex-row center-div" onclick="">
+
+ 
+    <NavLink href=@NavHref class="product-card-price">
+        <img src="@responce.Users?.FullImageLink" alt="" width="10" height="10" class="round" />
+        <h5 class="card-header">@responce.Users?.Login</h5>
+    </NavLink>
+</div>
+@code {
+    public ResponceSer responce = new ResponceSer();
+    public string Token { get; set; }
+    public User CurrentUser { get; set; } = new User();
+    [CascadingParameter(Name = "IsAuthorized")]
+    public bool IsAuthorized { get; set; }
+    [Parameter]
+    public int Id { get; set; }
+    [CascadingParameter]
+    private Task<AuthenticationState>? authenticationState { get; set; }
+    protected override async Task OnInitializedAsync()
+    {
+        if (!IsAuthorized) NavigationManager.NavigateTo("/auth");
+        if (authenticationState is not null)
+        {
+            var authState = await authenticationState;
+            var user = authState?.User;
+
+            if (user is not null)
+            {
+                if (user.Identity is not null && user.Identity.IsAuthenticated)
+                {
+                    var tokenClaim = user.FindFirst("Token");
+                    if (tokenClaim != null)
+                    {
+                        User? temp_user = await ArtLib.Auth.GetUserByToken(tokenClaim.Value);
+                        if (temp_user == null) NavigationManager.NavigateTo("/logout?returnUrl=/", true);
+                        else CurrentUser = temp_user;
+
+
+                        responce = await BaseHttpServices<ResponceSer>.SendAsync<ResponceSer>("ResponcesSer/oneresp?id=" + Id, HttpMethod.Get);
+
+                        //GetResponse();
+                    }
+                    else NavigationManager.NavigateTo("/logout?returnUrl=/", true);
+                }
+            }
+        }
+    }
+
+    private string GetHref()
+    {
+        if (CurrentUser.Id == responce.UserId)
+        { return "/profile"; }
+        else
+            return "userprofile/" + responce.UserId;
+    }
+
+    private string NavHref
+    {
+        get
+        {
+            if (CurrentUser.Id == responce.UserId)
+            { return "/profile"; }
+            else
+                return "userprofile/" + responce.UserId;
+        }
+    }
+}
+}

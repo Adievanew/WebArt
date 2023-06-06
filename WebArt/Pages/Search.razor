@@ -1,0 +1,162 @@
+﻿@*@using BootstrapBlazor.Components*@
+@using AntDesign
+@using System.Web;
+@using ArtLib;
+@using Microsoft.AspNetCore.Http
+@inject IHttpContextAccessor httpContextAccessor
+@inject Blazored.LocalStorage.ILocalStorageService localStorage
+@inject NavigationManager NavigationManager
+@*@using BootstrapBlazor.Components*@
+@inject IJSRuntime JS;
+@using System.Collections.ObjectModel;
+
+@page "/search/{Searchh}"
+<div class="d-flex flex-column center-div">
+
+                    <Select TItem="Item"
+                    TItemValue="string"
+                    DataSource="@_items"
+                    @bind-Value="@_selectedValue"
+                    ValueName="@nameof(Item.Name)"
+                    LabelName="@nameof(Item.Name)"
+                    DefaultActiveFirstOption
+                    Style="width: 200px;"
+                    OnSelectedItemChanged="OnSelectedItemChangedHandler">
+                <ItemTemplate>
+                    <span>@((context as Item).Name)</span>
+                </ItemTemplate>
+            </Select>
+              
+         <div class="d-flex flex-column">
+        @if (!String.IsNullOrWhiteSpace(Searchh))
+        {
+            <PageTitle>Поиск @Searchh</PageTitle>
+            <h3>Поиск @Searchh</h3>
+        }
+        <div>
+        @if (_selectedValue == "Заказы")
+        {
+             @foreach (var prod in ads)
+            {
+                <AdsComponent Id="@prod.Id"></AdsComponent>
+            }            
+        }
+
+        @if (_selectedValue == "Услуги")
+        {
+            @foreach (var prod in ser)
+            {
+                <ServicesComponent Id="@prod.Id"></ServicesComponent>
+            }
+        }
+        else
+        {
+            <div class="" style="display: block;">
+                <div style="height: 300px; display: block; margin-right: auto;text-align: center;vertical-align: middle;line-height: 300px;display: block;">
+                    <a href="/"><h3>Здесь пока ничего нет. Нажми!</h3></a>
+
+                </div>
+            </div>
+        }
+        </div>
+    </div>
+
+</div>
+@code {
+    [Parameter]
+    //[SupplyParameterFromQuery(Name = "Searchh")]
+    public string Searchh { get; set; } = "";
+    public class Item
+    {
+        public string Name { get; set; }
+
+    }
+    private async Task OnEnterAsync(string val)
+    {
+        if (Searchh != "") NavigationManag.NavigateTo($"search/" + Searchh);
+    }
+
+    private async Task SearchClick()
+    {
+        OnEnterAsync(Searchh);
+    }
+
+    List<Item> _items;
+    string _selectedValue;
+    Item _selectedItem;
+
+
+    private void OnSelectedItemChangedHandler(Item value)
+    {
+        _selectedItem = value;
+        Console.WriteLine($"selected: ${value?.Name}");
+    }
+    [CascadingParameter(Name = "Token")]
+    public string Token { get; set; }
+
+    void OnTabChange(string key)
+    {
+        Console.WriteLine($"tab change:{key}");
+    }
+
+    [CascadingParameter(Name = "IsAuthorized")]
+    public bool IsAuthorized { get; set; }
+    [CascadingParameter]
+    private Task<AuthenticationState>? authenticationState { get; set; }
+
+    public User CurrentUser { get; set; } = new User();
+
+    public ObservableCollection<ArtLib.Image> Images { get; set; } = new ObservableCollection<ArtLib.Image>();
+    public ObservableCollection<ArtLib.Ad> ads { get; set; } = new ObservableCollection<ArtLib.Ad>();
+    public ObservableCollection<ArtLib.Service> ser { get; set; } = new ObservableCollection<ArtLib.Service>();
+    public ObservableCollection<ArtLib.ResponceAd> respads { get; set; } = new ObservableCollection<ArtLib.ResponceAd>();
+    public ObservableCollection<ArtLib.ResponceSer> respser { get; set; } = new ObservableCollection<ArtLib.ResponceSer>();
+
+    protected override async Task OnParametersSetAsync()
+    {
+        if (!IsAuthorized) NavigationManager.NavigateTo("/auth", true);
+        if (authenticationState is not null)
+        {
+            var authState = await authenticationState;
+            var user = authState?.User;
+
+            if (user is not null)
+            {
+                if (user.Identity is not null && user.Identity.IsAuthenticated)
+                {
+                    var tokenClaim = user.FindFirst("Token");
+                    if (tokenClaim != null)
+                    {
+                        User? temp_user = await ArtLib.Auth.GetUserByToken(tokenClaim.Value);
+                        if (temp_user == null) NavigationManager.NavigateTo("/logout?returnUrl=/", true);
+                        else CurrentUser = temp_user;
+                        GetAds ();
+                        GetService();
+
+                        _items = new List<Item>
+        {
+            new Item {  Name = "Заказы"},
+            new Item {  Name = "Услуги"}
+        };
+                    }
+                    else NavigationManager.NavigateTo("/logout?returnUrl=/", true);
+                }
+            }
+        }
+    }
+  
+    private async Task GetAds()
+    {
+        ads = new ObservableCollection<Ad>(await BaseHttpServices<Ad>.SendListAsync<Ad>("Ads/", HttpMethod.Get));
+        ads = new ObservableCollection<ArtLib.Ad>(await BaseHttpServices<ArtLib.Ad>.SendListAsync<ArtLib.Ad>("Ads/Search?Search=" + Searchh, HttpMethod.Post));
+        if (ads == null) ads = new ObservableCollection<ArtLib.Ad>();
+        InvokeAsync(StateHasChanged);
+    }
+    private async Task GetService()
+    {
+        ser = new ObservableCollection<Service>(await BaseHttpServices<Service>.SendListAsync<Service>("Services/", HttpMethod.Get));
+        ser = new ObservableCollection<ArtLib.Service>(await BaseHttpServices<ArtLib.Service>.SendListAsync<ArtLib.Service>("Services/Search?Search=" +Searchh, HttpMethod.Post ));
+        if (ser == null) ser = new ObservableCollection<ArtLib.Service>();
+        InvokeAsync(StateHasChanged);
+    }
+}

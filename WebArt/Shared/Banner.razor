@@ -1,0 +1,29 @@
+﻿
+<div class="inline">
+    <div class="promo-banner">
+      
+        <div class="promo-banner-text">
+            <h3>@Header</h3>
+            <p>@Description</p>
+        </div>
+    </div>
+    <img src=" C:\Users\Aigul\source\repos\WebArt\WebArt\resources\banner-jobs-70d4c5ce69643c133609935849ab621619e891afde776a4a0dae41b947c2fdb8.png" alt="" class="promo-banner-image img-fluid" />
+</div>
+@code {
+  
+    public string Header { get; set; }
+
+    public string Description { get; set; } 
+
+  
+
+    [Parameter]
+    public string Link { get; set; }
+    public Banner()
+    {
+        Header = "Работа";
+        Description = "Получите оригинальную иллюстрацию или набросок идеи от тысяч творческих авторов!";
+        
+        Link = "/";
+    }
+}

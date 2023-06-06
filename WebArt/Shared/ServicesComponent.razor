@@ -7,41 +7,30 @@
 @using Microsoft.AspNetCore.Http
 @using AntDesign;
 
-<div
+<div 
     class="d-flex flex-column center-div">
-<NavLink href=@GetHref() >
-    <AntDesign.Card Title="@service.Name" Hoverable Style="width:500px; auto; margin:20px; ">
-       @* <Extra>
-            <h5 class="card-header"></h5>
-        </Extra>*@
-        <Body >
-           <div>
-                <p class="card-title">@service.Description</p>
-                <p class="card-body">@service.Cost р</p>
-            </div>
-            
-           
-             
+    <NavLink href="@GetHref()">
+        <AntDesign.Card Title="@service.Name" Hoverable Style="width:500px; auto; margin:20px; ">
 
-    @if (resp.Count == 0)
-    {
-        <BootstrapBlazor.Components.Button IsAsync="true" OnClick="@Otklik" class="product-cart-btn">Отклинуться</BootstrapBlazor.Components.Button>
-    }
-    else
-    {
-        <BootstrapBlazor.Components.Button IsDisabled="true" class="product-cart-btn">Откликнуться</BootstrapBlazor.Components.Button>
-    }
 
-     
-        </Body>
-        <ChildContent >
-            <CardMeta AvatarTemplate="@avatarTemplate" Title="@service.User?.Name" Description="@srcDate" />
-        </ChildContent>
-  
-   
-   
-</AntDesign.Card>
-</NavLink>
+            <Body>
+                <div>
+                    <p class="card-title">@service.Description</p>
+                    <p class="card-body">@service.Cost р</p>
+                </div>
+            </Body>
+
+            <ChildContent>
+                <AntDesign.Avatar Src=@srcAva></AntDesign.Avatar>
+                <p>@service.User?.Name</p>
+                <AntDesign.Descriptions>@srcDate</AntDesign.Descriptions>
+
+
+              
+            </ChildContent>
+
+        </AntDesign.Card>
+    </NavLink>
 </div>
 @code {
     RenderFragment avatarTemplate = @<AntDesign.Avatar src="srcAva"></AntDesign.Avatar>;
@@ -77,9 +66,14 @@
         GetResponse();
     }
     private string GetHref()
-    {
-        return "sercard/" + service.Id;
-    }
+        {
+            if (CurrentUser.Id == service.UserId)
+            { return "usersservicecard/" + service.Id; }
+            else
+            { return "servicecard/" + service.Id; }
+        }
+
+    
     private string GetHrefuser()
     {
         return "userprofile/" + service.Id;

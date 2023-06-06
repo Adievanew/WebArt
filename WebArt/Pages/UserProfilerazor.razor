@@ -22,17 +22,17 @@
             <div class="card p-3 py-4">
 
                 <div class="text-center">
-                    <img bind-value="@CurrentUser.FullImageLink" width="100" class="rounded-circle">
+                    <img bind-value="@userU.FullImageLink" width="100" class="rounded-circle">
                 </div>
 
 
                 <div class="text-center mt-3">
                     <span class="bg-secondary p-1 px-4 rounded text-white">Pro</span>
-                    <div class="mt-2 mb-0">@CurrentUser.Name</div>
-                    <span>@CurrentUser.City</span>
+                    <div class="mt-2 mb-0">@userU.Name</div>
+                    <span>@userU.City</span>
 
                     <div class="px-4 mt-1">
-                        <p class="fonts">@CurrentUser.Description</p>
+                        <p class="fonts">@userU.Description</p>
 
                     </div>
                 </div>
@@ -81,7 +81,7 @@
             {
                 @foreach (var prod in ads)
                 {
-                    <div class="inline"><AdsComponent Id="@prod.Id"></AdsComponent></div>
+                    <AdsComponent Id="@prod.Id"></AdsComponent>
                 }
             }
         </div>
@@ -101,7 +101,7 @@
             {
                 @foreach (var prod in ser)
                 {
-                    <div class="inline"><ServicesComponent Id="@prod.Id"></ServicesComponent></div>
+                    <ServicesComponent Id="@prod.Id"></ServicesComponent>
                 }
             }
         </div>
@@ -151,7 +151,8 @@
                         User? temp_user = await ArtLib.Auth.GetUserByToken(tokenClaim.Value);
                         if (temp_user == null) NavigationManager.NavigateTo("/logout?returnUrl=/", true);
                         else { CurrentUser = temp_user;
-                              userU = await BaseHttpServices<ArtLib.User>.SendAsync<ArtLib.User>("Users" + Id, HttpMethod.Get); }
+                            userU = await BaseHttpServices<ArtLib.User>.SendAsync<ArtLib.User>("Users/user?id=" + Id, HttpMethod.Get);
+                        }
                         ;
                         await GetAds();
                         await GetImages();
@@ -165,19 +166,19 @@
     private async Task GetImages()
     {
         //Products = new ObservableCollection<ShopLib.Product>(); адрес/api/image
-        Images = new ObservableCollection<ArtLib.Image>(await BaseHttpServices<ArtLib.Image>.SendListAsync<ArtLib.Image>("Images/user?id=" + CurrentUser.Id, HttpMethod.Get));
+        Images = new ObservableCollection<ArtLib.Image>(await BaseHttpServices<ArtLib.Image>.SendListAsync<ArtLib.Image>("Images/user?id=" + Id, HttpMethod.Get));
         //if (Images == null) Images = new ObservableCollection<ArtLib.Image>();
     }
     private async Task GetAds()
     {
         //Products = new ObservableCollection<ShopLib.Product>(); адрес/api/image
-        ads = new ObservableCollection<ArtLib.Ad>(await BaseHttpServices<ArtLib.Ad>.SendListAsync<ArtLib.Ad>("Ads/user?userid=" + CurrentUser.Id, HttpMethod.Get));
+        ads = new ObservableCollection<ArtLib.Ad>(await BaseHttpServices<ArtLib.Ad>.SendListAsync<ArtLib.Ad>("Ads/user?userid=" + Id, HttpMethod.Get));
         // if (ads == null) ads = new ObservableCollection<ArtLib.Ad>();
     }
     private async Task GetService()
     {
         //Products = new ObservableCollection<ShopLib.Product>(); адрес/api/image
-        ser = new ObservableCollection<ArtLib.Service>(await BaseHttpServices<ArtLib.Service>.SendListAsync<ArtLib.Service>("Services/user?id=" + CurrentUser.Id, HttpMethod.Get));
+        ser = new ObservableCollection<ArtLib.Service>(await BaseHttpServices<ArtLib.Service>.SendListAsync<ArtLib.Service>("Services/user?id=" + Id, HttpMethod.Get));
         // if (ser == null) ser = new ObservableCollection<ArtLib.Service>();
     }
 }

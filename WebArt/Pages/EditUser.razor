@@ -23,9 +23,7 @@
         <BootstrapInput @bind-Value="@CurrentUser.Login" PlaceHolder="Логин" IsTrim="true" ShowLabel="true" DisplayText="Логин" />
         <BootstrapInput @bind-Value="@CurrentUser.Name" PlaceHolder="Имя" IsTrim="true" ShowLabel="true" DisplayText="Имя" />
         <BootstrapInput @bind-Value="@CurrentUser.Password" PlaceHolder="Пароль" IsTrim="true" ShowLabel="true" DisplayText="Пароль"/>
-         <DatePicker @bind-Value="@CurrentUser.BirthDay" DisplayText="Дата рождения" PlaceHolder="Дата рождения" IsTrim="true" ShowLabel="true" />
-        @*<DatePicker TValue="DateTime?" Picker="@CurrentUser.BirthDay"  PlaceHolder="Дата рождения" IsTrim="true" ShowLabel="true" DisplayText="Дата рождения" />*@
-        <BootstrapInput @bind-Value="@CurrentUser.Description"  PlaceHolder="Описание" IsTrim="true" ShowLabel="true" DisplayText="Описание" type='phone' />
+          <BootstrapInput @bind-Value="@CurrentUser.Description"  PlaceHolder="Описание" IsTrim="true" ShowLabel="true" DisplayText="Описание" type='phone' />
         <BootstrapInput @bind-Value="@CurrentUser.City" PlaceHolder="Город" IsTrim="true" ShowLabel="true" DisplayText="Город" />
         <BootstrapBlazor.Components.Button OnClick=@SaveChanges>Сохранить</BootstrapBlazor.Components.Button>
         <BootstrapBlazor.Components.Button OnClick=@Logout Color="BootstrapBlazor.Components.Color.Danger">Выйти</BootstrapBlazor.Components.Button>
@@ -115,17 +113,17 @@
     private async void HandleFileUpload(InputFileChangeEventArgs e)
     {
         try{
-            var image = e.File;
+              var image = e.File;
             if (image != null && image.Size > 0)
             {
-                // Конвертируем файл в массив байтов
-                var buffer = new byte[image.Size];
-                await image.OpenReadStream().ReadAsync(buffer);
+                MemoryStream ms = new MemoryStream();
+                await e.File.OpenReadStream().CopyToAsync(ms);
+                var bytes = ms.ToArray();
 
                 using (var client = new HttpClient())
                 {
                     var content = new MultipartFormDataContent();
-                    var fileContent = new ByteArrayContent(buffer);
+                    var fileContent = new ByteArrayContent(bytes);
                     fileContent.Headers.ContentType = System.Net.Http.Headers.MediaTypeHeaderValue.Parse("image/jpeg");
                     content.Add(fileContent, "file", image.Name);
 

@@ -6,9 +6,11 @@
 @inject NavigationManager NavigationManager
 @using Microsoft.AspNetCore.Http
 @page "/adcard/{Id:int}"
+<div class="d-flex flex-column center-div">
  <AntDesign.Card Title="@ad.Name" Hoverable Style="width:500px; auto; margin:20px; ">
-       
-        <Body >
+   
+
+    <Body >
            <div>
             <p class="card-title">@ad.Description</p>
             <p class="card-body">@ad.Cost р</p>
@@ -16,16 +18,26 @@
         </Body>
         
         <ChildContent >
+            <NavLink  href="@GetHref()">
+        
         <AntDesign.Avatar Src=@srcAva></AntDesign.Avatar>
        @* <AntDesign.Title>@ad.User?.Name</AntDesign.Title>*@
         <p>@ad.User?.Name </p>
         <AntDesign.Descriptions>@srcDate</AntDesign.Descriptions>
-
+            </NavLink>
+            @if (resp.Count == 0)
+            {
+                <BootstrapBlazor.Components.Button IsAsync="true"  style="font-size: 20px; background: #00ff59" OnClick="@Otklik" class="product-cart-btn">Отклинуться</BootstrapBlazor.Components.Button>
+            }
+            else
+            {
+                <BootstrapBlazor.Components.Button IsAsync="true"  style="font-size: 20px; background: #fd0808" OnClick="@DeleteOtklik" class="product-cart-btn">Отменить отклик</BootstrapBlazor.Components.Button>
+            }
         </ChildContent>
 
 </AntDesign.Card>
 
-<div>
+@*<div>
     <div>
         @if (resp == null || resp.Count == 0)
         {
@@ -40,16 +52,19 @@
 
             @foreach (var prod in resp)
             {
-                <div class="inline"><ResponcesAdComponent Id="@prod.Id"></ResponcesAdComponent></div>
+                <ResponcesAdComponent Id="@prod.Id"></ResponcesAdComponent>
             }
         }
     </div>
+</div>*@
 </div>
-
 @code {
-    private string GetHrefuser()
+    private string GetHref()
     {
-        return "userprofile/" + ad.Id;
+        if (CurrentUser.Id == ad.UserId)
+        { return "profile/" + ad.Id; }
+        else
+        { return "userprofile/" + ad.UserId; }
     }
     RenderFragment avatarTemplate = @<AntDesign.Avatar src="srcAva"></AntDesign.Avatar>;
     [CascadingParameter(Name = "Token")]
@@ -66,6 +81,41 @@
     public List<ResponceAd> resp { get; set; } = new List<ResponceAd>();
     public Ad ad = new Ad();
     public ResponceAd responce = new ResponceAd();
+    private async Task GetResponse()
+    {
+        resp = new List<ResponceAd>(await BaseHttpServices<ResponceAd>.SendListAsync<ResponceAd>("Responcesad/user?userId=" + CurrentUser.Id + "&adId=" + ad.Id, HttpMethod.Get));
+        InvokeAsync(StateHasChanged);
+    }
+    private async Task Otklik()
+    {
+        responce.AdId = ad.Id;
+        //responce.Ads = ad;
+        responce.UserId = CurrentUser.Id;
+        responce = (await BaseHttpServices<ResponceAd>.SendListAsync<ResponceAd>("ResponcesAd/", HttpMethod.Post, responce)).FirstOrDefault();
+        ErrorMessage("Отклик доставлен");
+        GetResponse();
+    }
+    private async Task DeleteOtklik()
+    {
+        responce = resp.Where(p => p.UserId == CurrentUser.Id).FirstOrDefault();
+        await BaseHttpServices<ResponceAd>.SendListAsync<ResponceAd>("ResponcesAd/" + responce.Id, HttpMethod.Delete);
+        ErrorMessage("Отклик доставлен");
+        GetResponse();
+    }
+    private void ErrorMessage(string ex)
+    {
+        ToastService.Show(new BootstrapBlazor.Components.ToastOption()
+            {
+                // Notification category
+                Category = BootstrapBlazor.Components.ToastCategory.Success,
+
+                // Notification box Title value
+                Title = "Уведомление",
+
+                // Notification body content
+                Content = ex
+            });
+    }
     protected override async Task OnInitializedAsync()
     {
         if (!IsAuthorized) NavigationManager.NavigateTo("/auth");
@@ -89,6 +139,7 @@
                         resp = new List<ResponceAd>(await BaseHttpServices<ResponceAd>.SendListAsync<ResponceAd>("ResponcesAd/ad?adId=" + Id , HttpMethod.Get));
                         srcAva = ad.User?.FullImageLink;
                         srcDate = Convert.ToString(ad.Date);
+                        GetResponse();
                         //GetResponse();
                     }
                     else NavigationManager.NavigateTo("/logout?returnUrl=/", true);

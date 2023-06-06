@@ -1,77 +1,31 @@
-﻿@inject NavigationManager NavigationManager
-@*@using BootstrapBlazor.Components*@
-@using System.Collections.ObjectModel;
-@using AntDesign;
-
-
-
-
-<!-- Pills navs -->
-<!-- Pills content -->
-<div
-    class="d-flex flex-column center-div">
-<Tabs @bind-ActiveKey="@activeKey" OnChange="OnTabChange" >
-	  <TabPane Tab="Заказы" Key="1">
-        <div>
-            @if (Ads == null || Ads.Count == 0)
-            {
-                <div class="" style="display: block;">
-                    <div style="height: 300px; display: block; margin-right: auto;text-align: center;vertical-align: middle;line-height: 300px;display: block;">
-                        <a href=""><h3>Заказы по заданными параметрам не найдены</h3></a>
-                    </div>
-                </div>
-            }
-            else
-            {
-                @foreach (var prod in Ads)
-                {
-                    <div class="inline"><AdsComponent Id="@prod.Id"></AdsComponent></div>
-                }
-            }
+﻿
+<div class="inline">
+    <div class="promo-banner">
+      
+        <div class="promo-banner-text">
+            <h3>@Header</h3>
+            <p>@Description</p>
         </div>
-    </TabPane>
-    <TabPane Tab="Услуги" Key="2">
-        <div>
-            @if (Ser == null || Ser.Count == 0)
-            {
-                <div class="" style="display: block;">
-                    <div style="height: 300px; display: block; margin-right: auto;text-align: center;vertical-align: middle;line-height: 300px;display: block;">
-                        <a href=""><h3>Услуги по заданными параметрам не найдены</h3></a>
-                    </div>
-                </div>
-            }
-            else
-            {
-               
-                @foreach (var prod in Ser)
-                {
-                    <div class="inline"><ServicesComponent Id="@prod.Id"></ServicesComponent></div>
-                }
-            }
-        </div>
-    </TabPane>
-   
-</Tabs>
+    </div>
+    <img src="C:\Users\Aigul\source\repos\WebArt\WebArt\resources\banner-jobs-70d4c5ce69643c133609935849ab621619e891afde776a4a0dae41b947c2fdb8.jpg" alt="" />
 </div>
 @code {
-    public string activeKey { get; set; } = "1";
-    private ObservableCollection<Ad> Ads { get; set; } = new ObservableCollection<Ad>();
-    private ObservableCollection<Service> Ser { get; set; } = new ObservableCollection<Service>();
-    [CascadingParameter(Name = "Token")]
-    public string Token { get; set; }
+    [Parameter]
+    public string Header { get; set; }
 
-    [CascadingParameter(Name = "IsAuthorized")]
-    public bool IsAuthorized { get; set; }
+    [Parameter]
+    public string Description { get; set; } 
 
-     void OnTabChange(string key)
+  
+
+    [Parameter]
+    public string Link { get; set; }
+    public MainPageComponent()
     {
-        Console.WriteLine($"tab change:{key}");
+        Header = "Работа";
+        Description = "Получите оригинальную иллюстрацию или набросок идеи от тысяч творческих авторов!";
+        
+        Link = "/";
     }
 
-    protected override async Task OnInitializedAsync()
-    {
-        Ads = new ObservableCollection<Ad>(await BaseHttpServices<Ad>.SendListAsync<Ad>("Ads/", HttpMethod.Get));
-        Ser = new ObservableCollection<Service>(await BaseHttpServices<Service>.SendListAsync<Service>("Services/", HttpMethod.Get));
-
-    }
 }

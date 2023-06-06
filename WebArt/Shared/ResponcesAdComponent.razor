@@ -2,7 +2,7 @@
 <div class="d-flex flex-wrap center-div" onclick="" >
 
 
-    <NavLink href=@GetHref() class="product-card-price">
+    <NavLink href=@NavHref class="product-card-price">
         <img src="@responce.Users?.FullImageLink" alt="" width="10" height="10" class="round" />
         <h5 class="card-header">@responce.Users?.Login</h5>
     </NavLink>
@@ -37,8 +37,8 @@
                         else CurrentUser = temp_user;
 
 
-                        responce =await BaseHttpServices<ResponceAd>.SendAsync<ResponceAd>("ResponcesAd/" + Id, HttpMethod.Get);
-                       
+                        responce = await BaseHttpServices<ResponceAd>.SendAsync<ResponceAd>("ResponcesAd/oneresp?id=" + Id, HttpMethod.Get);
+
                         //GetResponse();
                     }
                     else NavigationManager.NavigateTo("/logout?returnUrl=/", true);
@@ -51,6 +51,18 @@
     { if (CurrentUser.Id == responce.UserId)
         { return "/profile"; }
         else
-        return "userprofile/" + responce.UserId;
+            return "userprofile/" + responce.UserId;
+    }
+
+    private string NavHref
+    {
+        get
+        {
+            if (CurrentUser.Id == responce.UserId)
+            { return "/profile"; }
+            else
+                return "userprofile/" + responce.UserId;
+        }
+        }
     }
 }

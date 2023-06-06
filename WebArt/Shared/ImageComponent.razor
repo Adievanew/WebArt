@@ -3,14 +3,14 @@
 @using System.Collections.ObjectModel
 @inject Blazored.LocalStorage.ILocalStorageService localStorage
 @inject BootstrapBlazor.Components.ToastService ToastService
+@inject NavigationManager NavigationManager
 
 
 <div class="product-card">
     <p>@image.Name</p>
    
-       
             <img src="@image.FullImageLink" class="product-card-image" />
-       
+  
 </div> 
 
 @code {
@@ -27,5 +27,26 @@
 
         image = (await BaseHttpServices<Image>.SendListAsync<Image>("Images/" + Id, HttpMethod.Get)).FirstOrDefault();
 
+    }
+    private async Task Delete()
+    {
+        await BaseHttpServices<Image>.SendListAsync<Image>("Images/"+ image.Id, HttpMethod.Delete);
+        ErrorMessage("Изображение удалено");
+        NavigationManager.NavigateTo("/profile", true);
+
+    }
+    private void ErrorMessage(string ex)
+    {
+        ToastService.Show(new BootstrapBlazor.Components.ToastOption()
+            {
+                // Notification category
+                Category = BootstrapBlazor.Components.ToastCategory.Error,
+
+                // Notification box Title value
+                Title = "Ошибка",
+
+                // Notification body content
+                Content = ex
+            });
     }
 }

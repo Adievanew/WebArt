@@ -1,76 +1,85 @@
 ﻿@using BootstrapBlazor.Components
 @using AntDesign
 <nav class="navbar navbar-expand-lg" >
-   <div class="container">
-    <a class="navbar-brand" href="/">
-      <img src="https://mdbcdn.b-cdn.net/img/logo/mdb-transaprent-noshadows.webp" height="20" alt="MDB Logo"
-        loading="lazy" />
-    </a>
-  </div>
-    <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarTogglerDemo02" aria-controls="navbarTogglerDemo02" aria-expanded="false" aria-label="Toggle navigation">
+    <div id="mainmenu">
+ 
+   @* <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarTogglerDemo02" aria-controls="navbarTogglerDemo02" aria-expanded="false" aria-label="Toggle navigation">
         <span class="navbar-toggler-icon"></span>
     </button>
-
-    <div class="collapse navbar-collapse" id="navbarTogglerDemo02">
-        <ul class="navbar-nav mr-auto">
-            <li class="nav-item">
-                <div class="d-flex gap-20" style="justify-content: space-between;">
-                    <NavLink href="/">
+*@
+   
+        <ul style="justify-content: space-between;">
+            <li>
+                <a>
+                    <NavLink href="/home">
                         <BootstrapBlazor.Components.Button style="font-size: 20px;">Главная</BootstrapBlazor.Components.Button>
                     </NavLink>
-                    <div class="d-flex">
-                        <BootstrapBlazor.Components.BootstrapInput @bind-Value="@Search" PlaceHolder="Поиск" IsTrim="true" OnEnterAsync="OnEnterAsync" style="max-width: 250px;" />
-                        <BootstrapBlazor.Components.Button OnClick="SearchClick"><Icon Type="search" Theme="outline" class="icons" /></BootstrapBlazor.Components.Button>
-                    </div>
-                </div>
+                  </a>
+                  
+            </li>
+    
+            <li> <a>
+            <BootstrapBlazor.Components.BootstrapInput @bind-Value="@Search" PlaceHolder="Поиск" IsTrim="true" OnEnterAsync="OnEnterAsync" style="max-width: 300px;" />
+                  
+        </a>
+                
+            </li>
+      
+            <li>
+
+                <BootstrapBlazor.Components.Button OnClick="SearchClick"><Icon Type="search" Theme="outline" class="icons" /></BootstrapBlazor.Components.Button>
+
+            </li>
+      
+            <li>
+                    <a href="/profile"><Icon Type="user" Theme="outline" class="icons"/> </a>
+                    
+            </li>
+      
+                    <li>
+
+                <AntDesign.Dropdown>
+                    <Overlay>
+
+                        <AntDesign.Menu>
+                            <MenuItem>
+                                 <li> 
+                                <a target="_blank" rel="noopener noreferrer" href="/addimage">
+                                    Изображение
+                                </a>
+                                   </li>
+                            </MenuItem>
+                            <MenuItem>
+                                 <li> 
+                                <a target="_blank" rel="noopener noreferrer" href="/addad">
+                                    Заказ
+                                </a>
+                                   </li>
+                            </MenuItem>
+                            <MenuItem>
+                                 <li>  
+                                <a target="_blank" rel="noopener noreferrer" href="/addservice">
+                                    Услугу
+                                </a>
+                            </li>
+                            </MenuItem>
+                        </AntDesign.Menu>
+                    </Overlay>
+                    <Unbound>
+                        <a class="ant-dropdown-link" @ref="@context.Current" @onclick:preventDefault>
+                            Добавить <Icon Type="down" />
+                        </a>
+                    </Unbound>
+                </AntDesign.Dropdown>
+
+
             </li>
         </ul>
 
-       <div class="d-flex align-items-center">
-    
-      <!-- Avatar -->
-            <div class="d-flex flex-row child my-2 my-lg-0">
-                <div class="d-flex flex-row child my-2 my-lg-0">
-
-                    <a href="/profile">
-             <Icon Type="user" Theme="outline" class="icons" />
-                    </a>
-                    </div>
-                      </div>
-       
-  <div>
-   
-  <AntDesign.Dropdown>
-    <Overlay>
-        <AntDesign.Menu>
-            <MenuItem>
-                <a target="_blank" rel="noopener noreferrer" href="/addimage">
-                    Изображение
-                </a>
-            </MenuItem>
-            <MenuItem>
-                <a target="_blank" rel="noopener noreferrer" href="/addad">
-                    Заказ
-                </a>
-            </MenuItem>
-            <MenuItem>
-                <a target="_blank" rel="noopener noreferrer" href="/addservice">
-                    Услугу
-                </a>
-            </MenuItem>
-        </AntDesign.Menu>
-    </Overlay>
-    <Unbound>
-        <a class="ant-dropdown-link" @ref="@context.Current" @onclick:preventDefault>
-            Добавить <Icon Type="down" />
-        </a>
-    </Unbound>
-</AntDesign.Dropdown>
+</div>
 
    
-   </div>
-    </div>
-    </div>
+   
 
 </nav>
 
@@ -80,7 +89,7 @@
 
     private async Task OnEnterAsync(string val)
     {
-        if (Search != "") NavigationManag.NavigateTo($"ad?search=" + Search);
+        if (Search != ""|| Search!=null) NavigationManag.NavigateTo($"search/" + Search);
     }
 
     private async Task SearchClick()

@@ -1,0 +1,56 @@
+﻿@using WebArt.Shared
+@using BootstrapBlazor.Components
+@using System.Collections.ObjectModel
+@inject Blazored.LocalStorage.ILocalStorageService localStorage
+@inject BootstrapBlazor.Components.ToastService ToastService
+@inject NavigationManager NavigationManager
+
+
+<div class="product-card">
+    <p>@image.Name</p>
+
+    <img src="@image.FullImageLink" class="product-card-image" />
+    <div class="text-center ">
+
+         <BootstrapBlazor.Components.Button OnClick="Delete" style="font-size: 20px;">Удалить</BootstrapBlazor.Components.Button>
+
+    </div>
+</div>
+
+@code {
+    public Image image = new Image();
+    [Parameter]
+    public int Id { get; set; }
+    [CascadingParameter(Name = "Token")]
+    public string Token { get; set; }
+    public User CurrentUser { get; set; } = new User();
+    [CascadingParameter(Name = "IsAuthorized")]
+    public bool IsAuthorized { get; set; }
+    protected override async Task OnParametersSetAsync()
+    {
+
+        image = (await BaseHttpServices<Image>.SendListAsync<Image>("Images/" + Id, HttpMethod.Get)).FirstOrDefault();
+
+    }
+    private async Task Delete()
+    {
+        await BaseHttpServices<Image>.SendListAsync<Image>("Images/" + image.Id, HttpMethod.Delete);
+        ErrorMessage("Изображение удалено");
+        NavigationManager.NavigateTo("/profile", true);
+
+    }
+    private void ErrorMessage(string ex)
+    {
+        ToastService.Show(new BootstrapBlazor.Components.ToastOption()
+            {
+                // Notification category
+                Category = BootstrapBlazor.Components.ToastCategory.Error,
+
+                // Notification box Title value
+                Title = "Ошибка",
+
+                // Notification body content
+                Content = ex
+            });
+    }
+}

@@ -6,55 +6,70 @@
 @inject IJSRuntime JSRuntime
 @using BootstrapBlazor.Components
 @using Microsoft.AspNetCore.Components.Web
-@using System.Web;
+
 @using AntDesign;
-@using Microsoft.AspNetCore.Http;
+
 @using WebArt.Models;
 @using ArtLib;
 @inject IJSRuntime JSRuntime
-@using BootstrapBlazor.Components
-@using Microsoft.AspNetCore.Components.Web;
+
 
 @implements IDisposable
 @inject IMessageService _message
 @inject BootstrapBlazor.Components.ToastService ToastService
 
 
-  <div class="card">
-   
-   
+<div class="card">
 
-    <div class="card-body">
-         <BootstrapInput @bind-Value="@AddedImage.Name" PlaceHolder="Наименование изображения" IsTrim="true" ShowLabel="true" DisplayText="Наименование изображения"  />
+
+
+    <div class="card-body" >
+        <div class="containerka">
+        <div class="col-2-3">
+                <div class="row d-flex justify-content-center">
+             <img src="@AddedImage.FullImageLink" alt="" width="300" height="300" />
+                <InputFile OnChange="HandleFileUpload" />
+             </div>
+               </div>
+        <div class="col-1-3">
+        <BootstrapInput @bind-Value="@AddedImage.Name" PlaceHolder="Наименование изображения" IsTrim="true" ShowLabel="true" DisplayText="Наименование изображения" />
 
         <BootstrapInput @bind-Value="@AddedImage.Description" PlaceHolder="Описание изображения" IsTrim="true" ShowLabel="true" DisplayText="Описание изображения" />
+         <div class="row d-flex justify-content-center">
+
         <AntDesign.Select TItem="JobCategory"
-                          TItemValue="int?"
+        Placeholder="Выберите категорию"
+                                    
+                                      TItemValue="int?"
                           DataSource="@categories"
                           @bind-Value="@AddedImage.CategoryId"
                           ValueName="@nameof(JobCategory.Id)"
                           LabelName="@nameof(JobCategory.Name)"
-                          Style="width:120px"
+                          Style="width:300px"
                           OnSelectedItemChanged="OnSelectedItemChangedHandler">
         </AntDesign.Select>
+
         <AntDesign.Select TItem="Style"
+                                  Placeholder="Выберите стиль"
                           TItemValue="int?"
                           DataSource="@style"
                           @bind-Value="@AddedImage.StyleId"
                           ValueName="@nameof(JobCategory.Id)"
                           LabelName="@nameof(JobCategory.Name)"
-                          Style="width:120px"
+                          Style="width:200px"
                           OnSelectedItemChanged="OnSelectedItemChangedHandler">
         </AntDesign.Select>
-         <img src="@CurrentUser.FullImageLink" alt="" width="300" height="300" />
-         <InputFile OnChange="HandleFileUpload"/>
+       @*
+        <asp:FileUpload ID="FileUploadControl" runat="server" />
+        <asp:Button ID="UploadButton" runat="server" Text="Upload File" OnClick="UploadButton_Click" />*@
 
- 
+        <BootstrapBlazor.Components.Button OnClick=@SaveChanges>Опубликовать</BootstrapBlazor.Components.Button>
+        </div>
+            </div>
+    </div>
 
-    <BootstrapBlazor.Components.Button OnClick=@SaveChanges>Опубликовать</BootstrapBlazor.Components.Button>
- 
-     </div>
-   
+
+</div>
 
 </div>
 
@@ -64,13 +79,13 @@
     public User CurrentUser { get; set; } = new User();
     [CascadingParameter]
     private Task<AuthenticationState>? authenticationState { get; set; }
-    public List<ArtLib.JobCategory> categories= new  List<ArtLib.JobCategory>();
+    public List<ArtLib.JobCategory> categories = new List<ArtLib.JobCategory>();
     public List<ArtLib.Style> style = new List<ArtLib.Style>();
     public ArtLib.Image AddedImage { get; set; } = new ArtLib.Image();
     [Parameter]
     public int Id { get; set; }
     // public DateTime date  = new DateTime();
-     private CancellationTokenSource? ReadAvatarToken { get; set; }
+    private CancellationTokenSource? ReadAvatarToken { get; set; }
     [CascadingParameter(Name = "Token")]
     public string Token { get; set; }
 
@@ -103,23 +118,24 @@
             }
         }
     }
-  
+
 
     private async void HandleFileUpload(InputFileChangeEventArgs e)
     {
         try
         {
+
             var image = e.File;
-            if (image != null && image.Size > 0)
+            if (image != null && image.Size > 0 && image.Size < 512000)
             {
-                // Конвертируем файл в массив байтов
-                var buffer = new byte[image.Size];
-                await image.OpenReadStream().ReadAsync(buffer);
+                MemoryStream ms = new MemoryStream();
+                await e.File.OpenReadStream().CopyToAsync(ms);
+                var bytes = ms.ToArray();
 
                 using (var client = new HttpClient())
                 {
                     var content = new MultipartFormDataContent();
-                    var fileContent = new ByteArrayContent(buffer);
+                    var fileContent = new ByteArrayContent(bytes);
                     fileContent.Headers.ContentType = System.Net.Http.Headers.MediaTypeHeaderValue.Parse("image/jpeg");
                     content.Add(fileContent, "file", image.Name);
 
@@ -143,17 +159,23 @@
     }
     public void Dispose()
     {
-        ReadAvatarToken?.Cancel();
-        GC.SuppressFinalize(this);
+        //ReadAvatarToken?.Cancel();
+        //GC.SuppressFinalize(this);
     }
     private async Task SaveChanges()
     {
-       
-        AddedImage.UserId = CurrentUser.Id;
-        //int stock = await Ad.GetProductStock(Id);
-        //IsAvailable = stock > 0;
-        AddedImage = (await BaseHttpServices<Service>.SendListAsync<ArtLib.Image>("Images/", HttpMethod.Post, AddedImage)).FirstOrDefault();
-        OnInfoClick("Привет");
+        try
+        {
+            AddedImage.UserId = CurrentUser.Id;
+            //int stock = await Ad.GetProductStock(Id);
+            //IsAvailable = stock > 0;
+            AddedImage = (await BaseHttpServices<ArtLib.Image>.SendListAsync<ArtLib.Image>("Images/", HttpMethod.Post, AddedImage)).FirstOrDefault();
+            OnInfoClick("Изображение опубликовано");
+        }
+        catch (Exception ex)
+        {
+
+        }
     }
     private async Task Otklik()
     { }
@@ -196,5 +218,5 @@
     {
         //Console.WriteLine($"selected: ${value?.Name}");
     }
-   
+
 }

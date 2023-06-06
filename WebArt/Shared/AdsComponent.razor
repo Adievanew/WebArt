@@ -6,39 +6,33 @@
 @inject NavigationManager NavigationManager
 @using Microsoft.AspNetCore.Http
 @using AntDesign;
-<div
-    class="d-flex flex-column center-div">
-<NavLink href=@GetHref() >
+<div class="d-flex flex-column center-div">
+    <NavLink href="@GetHref()">
+   
     <AntDesign.Card Title="@ad.Name" Hoverable Style="width:500px; auto; margin:20px; ">
-       @* <Extra>
-            <h5 class="card-header"></h5>
-        </Extra>*@
+           
+                
         <Body >
            <div>
-            <p class="card-title">@ad.Description</p>
+            
+                    <p class="card-title">@ad.Description</p>
+              
             <p class="card-body">@ad.Cost р</p>
             </div>
-           
-     
+
         </Body>
-        <ChildContent >
+      
+        <ChildContent>
             <AntDesign.Avatar Src=@srcAva></AntDesign.Avatar>
-            <AntDesign.Title>@ad.User?.Name</AntDesign.Title>
+            <p>@ad.User?.Name</p>
             <AntDesign.Descriptions>@srcDate</AntDesign.Descriptions>
 
 
-            @if (resp.Count == 0)
-            {
-                <BootstrapBlazor.Components.Button IsAsync="true" OnClick="@Otklik" class="product-cart-btn">Отклинуться</BootstrapBlazor.Components.Button>
-            }
-            else
-            {
-                <BootstrapBlazor.Components.Button IsDisabled="true" class="product-cart-btn">Откликнуться</BootstrapBlazor.Components.Button>
-            }
+          
         </ChildContent>
-
+       
 </AntDesign.Card>
-</NavLink>
+    </NavLink>
 </div>
 @code {
     RenderFragment avatarTemplate = @<AntDesign.Avatar Src=srcAva></AntDesign.Avatar>;
@@ -56,16 +50,18 @@
     public string srcDate;
     [CascadingParameter]
     private Task<AuthenticationState>? authenticationState { get; set; }
-
     private string GetHref()
-    {
-        return "adcard/" + ad.Id;
+    { if (CurrentUser.Id  == ad.UserId)
+        { return "usersadcard/" + ad.Id; }
+        else
+        { return "adcard/" + ad.Id; }
     }
+  
     private string GetHrefuser()
-    {
+    { 
         return "userprofile/" + ad.Id;
     }
-
+    
 
     protected override async Task OnInitializedAsync()
     {
@@ -87,7 +83,7 @@
                         else CurrentUser = temp_user;
 
                         ad = (await BaseHttpServices<Ad>.SendListAsync<Ad>("Ads/" + Id, HttpMethod.Get)).FirstOrDefault();
-                        GetResponse();
+                      
                         srcAva = ad.User?.FullImageLink;
                         srcDate = Convert.ToString(ad.Date);
                         InvokeAsync(StateHasChanged);
@@ -110,6 +106,13 @@
         //responce.Ads = ad;
         responce.UserId = CurrentUser.Id;
         responce = (await BaseHttpServices<ResponceAd>.SendListAsync<ResponceAd>("ResponcesAd/", HttpMethod.Post, responce)).FirstOrDefault();
+        ErrorMessage("Отклик доставлен");
+        GetResponse();
+    }
+    private async Task DeleteOtklik()
+    {
+        responce = resp.Where(p => p.UserId == CurrentUser.Id).FirstOrDefault();
+        await BaseHttpServices<ResponceAd>.SendListAsync<ResponceAd>("ResponcesAd/" + responce.Id, HttpMethod.Delete);
         ErrorMessage("Отклик доставлен");
         GetResponse();
     }

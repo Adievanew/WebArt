@@ -20,7 +20,7 @@
             <div class="card p-3 py-4">
 
                 <div class="text-center ">
-                    <img src="@CurrentUser.FullImageLink" width="100" class="round">
+                    <img src="@CurrentUser.FullImageLink" alt="" class="round" width="100" height="100">
                 </div>
 
 
@@ -33,7 +33,6 @@
                         <p class="fonts">@CurrentUser.Description</p>
 
                     </div>
-                    @*<Registration/>*@
                      <NavLink href="/edituser">
                         <BootstrapBlazor.Components.Button style="font-size: 20px;">Редактировать</BootstrapBlazor.Components.Button>
                     </NavLink>
@@ -71,7 +70,7 @@
                 {
                     @foreach (var prod in Images)
                     {
-                        <div class="inline"><ImageComponent Id="@prod.Id"></ImageComponent></div>
+                        <div class="inline"><UsersImageComponent Id="@prod.Id"></UsersImageComponent></div>
                     }
                 }
          
@@ -91,7 +90,7 @@
             {
                 @foreach (var prod in ads)
                 {
-                    <div class="inline"><AdsComponent Id="@prod.Id"></AdsComponent></div>
+                    <AdsComponent Id="@prod.Id"></AdsComponent>
                 }
             }
         </div>
@@ -111,7 +110,7 @@
             {
                 @foreach (var prod in ser)
                 {
-                    <div class="inline"><ServicesComponent Id="@prod.Id"></ServicesComponent></div>
+                    <ServicesComponent Id="@prod.Id"></ServicesComponent>
                 }
             }
         </div>
@@ -135,16 +134,18 @@
         <div>
             @if (_selectedValue == "Заказы" )
             {
-                @foreach (var prod in ser)
+                @foreach (var prod in respads)
                 {
-                    <div class="inline"><AdsComponent Id="@prod.Id"></AdsComponent></div>
-                }
+                    <AdsComponent Id="@prod.AdId"></AdsComponent>
+
+                   @* <BootstrapBlazor.Components.Button IsAsync="true" OnClick="@Delete" class="product-cart-btn">Удалить отклик</BootstrapBlazor.Components.Button>
+          *@      }
             }
             @if (_selectedValue == "Услуги")
             {
-                @foreach (var prod in ser)
+                @foreach (var prod in respser)
                 {
-                    <div class="inline"><ServicesComponent Id="@prod.Id"></ServicesComponent></div>
+                    <ServicesComponent Id="@prod.SerId"></ServicesComponent>
                 }
             }
             else
@@ -199,6 +200,8 @@
     public ObservableCollection<ArtLib.Image> Images { get; set; } = new ObservableCollection<ArtLib.Image>();
     public ObservableCollection<ArtLib.Ad> ads { get; set; } = new ObservableCollection<ArtLib.Ad>();
     public ObservableCollection<ArtLib.Service> ser { get; set; } = new ObservableCollection<ArtLib.Service >();
+    public ObservableCollection<ArtLib.ResponceAd> respads { get; set; } = new ObservableCollection<ArtLib.ResponceAd>();
+    public ObservableCollection<ArtLib.ResponceSer> respser { get; set; } = new ObservableCollection<ArtLib.ResponceSer>();
 
     protected override async Task OnInitializedAsync()
     {
@@ -221,6 +224,9 @@
                          await GetAds();
                          await  GetImages();
                          await  GetService();
+                        respads = new ObservableCollection<ArtLib.ResponceAd>(await BaseHttpServices<ArtLib.ResponceAd>.SendListAsync<ArtLib.ResponceAd>("ResponcesAd/" + CurrentUser.Id, HttpMethod.Get));
+                        respser = new ObservableCollection<ArtLib.ResponceSer>(await BaseHttpServices<ArtLib.ResponceSer>.SendListAsync<ArtLib.ResponceSer>("ResponcesSer/" + CurrentUser.Id, HttpMethod.Get));
+                       
                         _items = new List<Item>
         {
             new Item {  Name = "Заказы"},

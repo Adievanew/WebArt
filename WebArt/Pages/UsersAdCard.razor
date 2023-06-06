@@ -1,0 +1,130 @@
+﻿@using WebArt.Shared
+@using BootstrapBlazor.Components
+@using System.Collections.ObjectModel
+@inject Blazored.LocalStorage.ILocalStorageService localStorage
+@inject BootstrapBlazor.Components.ToastService ToastService
+@inject NavigationManager NavigationManager
+@using Microsoft.AspNetCore.Http
+@page "/usersadcard/{Id:int}"
+<div class="d-flex flex-column center-div">
+ <AntDesign.Card Title="@ad.Name" Hoverable Style="width:500px; auto; margin:20px; ">
+    <Extra>
+        <BootstrapBlazor.Components.Button OnClick="Delete" style="font-size: 20px; background:#fd0808">Удалить</BootstrapBlazor.Components.Button>
+
+    </Extra>
+
+    <Body >
+           <div>
+            <p class="card-title">@ad.Description</p>
+            <p class="card-body">@ad.Cost р</p>
+            </div>
+        </Body>
+        
+        <ChildContent >
+        <AntDesign.Avatar Src=@srcAva></AntDesign.Avatar>
+       @* <AntDesign.Title>@ad.User?.Name</AntDesign.Title>*@
+        <p>@ad.User?.Name </p>
+        <AntDesign.Descriptions>@srcDate</AntDesign.Descriptions>
+
+        </ChildContent>
+
+</AntDesign.Card>
+<div>
+    <div>
+        @if (resp == null || resp.Count == 0)
+        {
+            <div class="" style="display: block;">
+                <div style="height: 300px; display: block; margin-right: auto;text-align: center;vertical-align: middle;line-height: 300px;display: block;">
+                    <a href=""><h3>Здесь пока нет откликов</h3></a>
+                </div>
+            </div>
+        }
+        else
+        {
+
+            @foreach (var prod in resp)
+            {
+                <div class="inline"><ResponcesAdComponent Id="@prod.Id"></ResponcesAdComponent></div>
+            }
+        }
+    </div>
+</div>
+</div>
+@code {
+    private string GetHrefuser()
+    {
+        return "userprofile/" + ad.Id;
+    }
+    RenderFragment avatarTemplate = @<AntDesign.Avatar src="srcAva"></AntDesign.Avatar>;
+    [CascadingParameter(Name = "Token")]
+    public string Token { get; set; }
+    public User CurrentUser { get; set; } = new User();
+    [CascadingParameter(Name = "IsAuthorized")]
+    public bool IsAuthorized { get; set; }
+    [Parameter]
+    public int Id { get; set; }
+    [CascadingParameter]
+    private Task<AuthenticationState>? authenticationState { get; set; }
+    public string srcAva;
+    public string srcDate;
+    public List<ResponceAd> resp { get; set; } = new List<ResponceAd>();
+    public Ad ad = new Ad();
+    public ResponceAd responce = new ResponceAd();
+    private string GetHref()
+    {
+        return "adcard/" + ad.Id;
+    }
+    private async Task Delete()
+    {  
+        await BaseHttpServices<Ad>.SendListAsync<Ad>("Ads/"+ ad.Id, HttpMethod.Delete);
+        ErrorMessage("Заказ удален");
+        NavigationManager.NavigateTo("/profile", true);
+       
+    }
+    protected override async Task OnInitializedAsync()
+    {
+        if (!IsAuthorized) NavigationManager.NavigateTo("/auth");
+        if (authenticationState is not null)
+        {
+            var authState = await authenticationState;
+            var user = authState?.User;
+
+            if (user is not null)
+            {
+                if (user.Identity is not null && user.Identity.IsAuthenticated)
+                {
+                    var tokenClaim = user.FindFirst("Token");
+                    if (tokenClaim != null)
+                    {
+                        User? temp_user = await ArtLib.Auth.GetUserByToken(tokenClaim.Value);
+                        if (temp_user == null) NavigationManager.NavigateTo("/logout?returnUrl=/", true);
+                        else CurrentUser = temp_user;
+
+                        ad = (await BaseHttpServices<Ad>.SendListAsync<Ad>("Ads/" + Id, HttpMethod.Get)).FirstOrDefault();
+                        resp = new List<ResponceAd>(await BaseHttpServices<ResponceAd>.SendListAsync<ResponceAd>("ResponcesAd/ad?adId=" + Id, HttpMethod.Get));
+                        srcAva = ad.User?.FullImageLink;
+                        srcDate = Convert.ToString(ad.Date);
+                        //GetResponse();
+                    }
+                    else NavigationManager.NavigateTo("/logout?returnUrl=/", true);
+                }
+            }
+        }
+
+    }
+    private void ErrorMessage(string ex)
+    {
+        ToastService.Show(new BootstrapBlazor.Components.ToastOption()
+            {
+                // Notification category
+                Category = BootstrapBlazor.Components.ToastCategory.Success,
+
+                // Notification box Title value
+                Title = "Уведомление",
+
+                // Notification body content
+                Content = ex
+            });
+    }
+}
+
